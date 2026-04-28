@@ -22,9 +22,10 @@ function RegisterPage() {
     setError("");
     setLoading(true);
     const formData = new FormData(e.currentTarget);
-    formData.set("flow", "signUp");
+    const data = Object.fromEntries(formData.entries());
+    (data as any).flow = "signUp";
     
-    signIn("password", formData)
+    signIn("password", data)
       .then(() => {
         sessionStorage.removeItem("bs_session_id");
         // We use a delay to ensure the session is synced across the system
