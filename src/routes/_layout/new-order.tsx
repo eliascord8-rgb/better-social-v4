@@ -1,23 +1,29 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { convexQuery } from "@convex-dev/react-query";
-import { useMutation } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
-import { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 
 export const Route = createFileRoute('/_layout/new-order')({
   component: NewOrderPage,
 })
 
 function NewOrderPage() {
-  const { data: categories } = useSuspenseQuery(convexQuery(api.orders.getCategories, {}));
+  const categories = useQuery(api.orders.getCategories, {});
   const submitOrder = useMutation(api.orders.submitOrder);
   const navigate = useNavigate();
 
-  const [selectedCategory, setSelectedCategory] = useState(categories[0] || "");
-  const { data: rawServices } = useSuspenseQuery(
-    convexQuery(api.orders.getServicesByCategory, { category: selectedCategory })
-  );
+  const [selectedCategory, setSelectedCategory] = useState("");
+  
+  useEffect(() => {
+    if (categories && categories.length > 0 && !selectedCategory) {
+        setSelectedCategory(categories[0]);
+    }
+  }, [categories, selectedCategory]);
+
+  const rawServices = useQuery(
+    api.orders.getServicesByCategory, 
+    selectedCategory ? { category: selectedCategory } : "skip" as any
+  ) || [];
 
   // Filter for only Service 7242
   const services = useMemo(() => {
@@ -74,6 +80,14 @@ function NewOrderPage() {
   const filteredCategories = useMemo(() => {
     return categories;
   }, [categories]);
+
+  if (categories === undefined) {
+      return (
+          <div className="flex items-center justify-center py-32">
+              <div className="w-10 h-10 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+          </div>
+      );
+  }
 
   if (categories.length === 0) {
       return (
