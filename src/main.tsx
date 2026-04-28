@@ -1,4 +1,5 @@
 import React from 'react'
+// SPA MOUNT
 import ReactDOM from 'react-dom/client'
 import { getRouter } from './router'
 import { RouterProvider } from '@tanstack/react-router'
