@@ -1,8 +1,8 @@
 export default {
   providers: [
     {
-      // Reverting to the system default is required for the JWT handshake to work
-      domain: process.env.CONVEX_SITE_URL,
+      // Use SITE_URL (the frontend domain) if set, fallback to system default
+      domain: process.env.SITE_URL || process.env.CONVEX_SITE_URL,
       applicationID: "convex",
     },
   ],
