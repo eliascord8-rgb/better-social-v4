@@ -5,21 +5,15 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [
     Password({
         profile(params) {
-            const rawEmail = (params.email || params.identifier || params.emailAddress) as string;
-            if (!rawEmail) throw new Error("Email required.");
-            const email = rawEmail.toLowerCase().trim();
+            // The most resilient identifier extraction possible
+            const email = ((params.email || params.identifier || params.emailAddress) as string).toLowerCase().trim();
+            const username = ((params.username || params.name) as string || email.split("@")[0]).trim();
             
-            const rawUsername = (params.username || params.name || params.preferred_username) as string;
-            const username = (rawUsername || email.split("@")[0] || "User").trim();
-            
-            const birthday = (params.birthday as string) || "2000-01-01";
-
             return {
                 email,
                 username,
                 name: username,
-                preferred_username: username, // Added for extra search compatibility
-                birthday,
+                birthday: (params.birthday as string) || "2000-01-01",
                 balance: 0,
                 level: 1,
                 exp: 0,
