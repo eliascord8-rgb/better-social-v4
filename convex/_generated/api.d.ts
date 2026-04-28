@@ -12,6 +12,7 @@ import type * as admin from "../admin.js";
 import type * as auth from "../auth.js";
 import type * as chat from "../chat.js";
 import type * as crons from "../crons.js";
+import type * as debug from "../debug.js";
 import type * as directMessages from "../directMessages.js";
 import type * as friends from "../friends.js";
 import type * as games from "../games.js";
@@ -38,6 +39,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   chat: typeof chat;
   crons: typeof crons;
+  debug: typeof debug;
   directMessages: typeof directMessages;
   friends: typeof friends;
   games: typeof games;

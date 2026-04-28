@@ -5,26 +5,20 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [
     Password({
         profile(params) {
-            // Log everything for one last check in Convex dashboard
-            console.log("INTERNAL_AUTH_PARAMS:", JSON.stringify(params));
-            
-            // 1. EXTRACT EMAIL (Primary ID)
-            const rawEmail = (params.email || params.identifier) as string;
+            const rawEmail = (params.email || params.identifier || params.emailAddress) as string;
             if (!rawEmail) throw new Error("Email required.");
             const email = rawEmail.toLowerCase().trim();
             
-            // 2. EXTRACT USERNAME (Rename support)
-            // We look for 'username' or any other field that might hold the ID
             const rawUsername = (params.username || params.name || params.preferred_username) as string;
-            const username = (rawUsername || email.split("@")[0] || "Node_User").trim();
+            const username = (rawUsername || email.split("@")[0] || "User").trim();
             
             const birthday = (params.birthday as string) || "2000-01-01";
 
-            // 3. FORCE SAVE TO ALL IDENTITY FIELDS
             return {
                 email,
                 username,
-                name: username, // Important: Save to 'name' as well for redundancy
+                name: username,
+                preferred_username: username, // Added for extra search compatibility
                 birthday,
                 balance: 0,
                 level: 1,

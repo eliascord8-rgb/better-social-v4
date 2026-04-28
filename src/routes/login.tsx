@@ -40,7 +40,8 @@ function LoginPage() {
             navigate({ to: "/dashboard" });
         }, 1500);
     } catch (err: any) {
-        setError("Invalid credentials or network error");
+        console.error("Login error details:", err);
+        setError(err.message || "Invalid credentials or network error");
         setLoading(false);
     }
   };
