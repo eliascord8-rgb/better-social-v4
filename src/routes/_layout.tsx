@@ -2,7 +2,7 @@ import { createFileRoute, Link, Outlet, useNavigate } from '@tanstack/react-rout
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useI18n } from "../lib/i18n";
 import type { Id } from "../../convex/_generated/dataModel";
 import { UserProfileModal } from "../components/UserProfileModal";
@@ -458,15 +458,17 @@ function DashboardLayout() {
     }
   }, [allTickets, lastTicketCount, user?.isAdmin, user?.isMod]);
 
-  if (user === undefined) {
-    return (
-        <div className="flex h-screen bg-[#030712] items-center justify-center">
-            <div className="w-10 h-10 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
-        </div>
-    );
-  }
+  // Removed explicit page loader to prevent stuck states
+  // if (user === undefined) {
+  //   return (
+  //       <div className="flex h-screen bg-[#030712] items-center justify-center">
+  //           <div className="w-10 h-10 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+  //       </div>
+  //   );
+  // }
 
-  if (!user) return null;
+  // Only block if explicitly null (not logged in)
+  if (user === null) return null;
 
   return (
     <div className="flex h-[100dvh] bg-[#030712] text-zinc-100 overflow-hidden font-sans selection:bg-blue-500 selection:text-white">
@@ -612,7 +614,13 @@ function DashboardLayout() {
             <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] pointer-events-none mix-blend-overlay"></div>
             
             <div className="p-4 md:p-8 lg:p-12 max-w-7xl mx-auto pb-32">
-                <Outlet />
+                <Suspense fallback={
+                    <div className="flex items-center justify-center py-20">
+                        <div className="w-8 h-8 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+                    </div>
+                }>
+                    <Outlet />
+                </Suspense>
             </div>
         </main>
 
