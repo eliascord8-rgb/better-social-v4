@@ -1,0 +1,78 @@
+@import 'tailwindcss';
+
+@layer base {
+  html,
+  body {
+    @apply text-zinc-200 bg-[#030712];
+    height: 100dvh;
+    width: 100vw;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    touch-action: manipulation;
+  }
+
+  /* Force scrollbar to be visible */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #27272a;
+    border-radius: 10px;
+    border: 1px solid #030712;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3b82f6;
+  }
+  ::-webkit-scrollbar-track {
+    background: #030712;
+  }
+
+  /* Prevent iOS zoom on input focus */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+
+  /* Fix for sidebar zoom bugs on mobile */
+  aside {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  @supports (-webkit-touch-callout: none) {
+    /* iOS specific fixes */
+    .h-screen {
+      height: 100dvh !important;
+    }
+  }
+}
+
+@theme {
+  --color-brand: #3b82f6;
+  --color-bg-dark: #0a0f1e;
+  --color-card-dark: #161d2f;
+
+  --animate-spin-slow: spin 8s linear infinite;
+  --animate-zoom-in: zoomIn 1s ease-out;
+
+  @keyframes zoomIn {
+    from {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+
