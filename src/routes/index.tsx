@@ -1,6 +1,9 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useI18n } from '../lib/i18n'
 import type { Language } from '../lib/i18n'
+import { useQuery } from 'convex/react'
+import { api } from '../../convex/_generated/api'
+import { useEffect } from 'react'
 
 export const Route = createFileRoute('/')({
   component: Home,
@@ -25,6 +28,14 @@ function LanguageSwitcher({ current, onSelect }: { current: Language, onSelect: 
 
 function Home() {
   const { t, lang, setLang } = useI18n();
+  const user = useQuery(api.users.currentUser, {});
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+        navigate({ to: '/dashboard' });
+    }
+  }, [user, navigate]);
 
   return (
     <div className="flex flex-col min-h-screen bg-[#030712] text-zinc-100 selection:bg-blue-500 selection:text-white font-sans overflow-x-hidden">
