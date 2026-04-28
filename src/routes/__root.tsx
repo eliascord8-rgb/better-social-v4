@@ -1,13 +1,10 @@
 import {
-  HeadContent,
   Outlet,
-  Scripts,
   createRootRouteWithContext,
   useNavigate,
 } from '@tanstack/react-router'
 import * as React from 'react'
 import type { QueryClient } from '@tanstack/react-query'
-import appCss from '~/styles/app.css?url'
 import { LiveChatWidget } from '../components/LiveChatWidget'
 import { Authenticated, useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -17,32 +14,6 @@ import { useI18n } from '../lib/i18n'
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
 }>()({
-  head: () => ({
-    meta: [
-      {
-        charSet: 'utf-8',
-      },
-      {
-        name: 'viewport',
-        content: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover',
-      },
-      {
-        name: 'apple-mobile-web-app-capable',
-        content: 'yes',
-      },
-      {
-        name: 'apple-mobile-web-app-status-bar-style',
-        content: 'black-translucent',
-      },
-      {
-        title: 'Better Social',
-      },
-    ],
-    links: [
-      { rel: 'stylesheet', href: appCss },
-      { rel: 'icon', href: '/favicon.ico' },
-    ],
-  }),
   notFoundComponent: () => <div>Route not found</div>,
   component: RootComponent,
 })
@@ -146,34 +117,16 @@ function RootComponent() {
   const user = useQuery(api.users.currentUser, {});
 
   if (isMaintenance && !user?.isAdmin) {
-      return (
-          <RootDocument>
-              <MaintenanceMode />
-          </RootDocument>
-      );
+      return <MaintenanceMode />;
   }
 
   return (
-    <RootDocument>
+    <>
       <Authenticated>
         <GlobalSessionManager />
       </Authenticated>
       <Outlet />
       <LiveChatWidget />
-    </RootDocument>
-  )
-}
-
-function RootDocument({ children }: { children: React.ReactNode }) {
-  return (
-    <html>
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        {children}
-        <Scripts />
-      </body>
-    </html>
+    </>
   )
 }
