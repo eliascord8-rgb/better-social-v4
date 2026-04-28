@@ -1,8 +1,8 @@
 export default {
   providers: [
     {
-      // Explicitly trust your new domain and the development URL
-      domain: "https://better-social.pro",
+      // The domain must be the host name WITHOUT https://
+      domain: "better-social.pro",
       applicationID: "convex",
     },
   ],

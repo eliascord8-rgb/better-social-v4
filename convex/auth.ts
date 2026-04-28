@@ -5,26 +5,23 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [
     Password({
         profile(params) {
-            // Detailed logging (Check your Convex Dashboard logs)
-            console.log("REGISTER PARAMS:", JSON.stringify(params));
+            // Find the unique identifier (email)
+            const identifier = (params.email || params.identifier) as string;
+            if (!identifier) {
+                throw new Error("Registration failed: No email provided.");
+            }
             
-            // 1. EXTRACT EMAIL
-            const rawEmail = (params.email || params.identifier) as string;
-            if (!rawEmail) throw new Error("Email is required for registration.");
-            const email = rawEmail.toLowerCase().trim();
+            const email = identifier.toLowerCase().trim();
             
-            // 2. EXTRACT USERNAME (Crucial fix for your DB visibility issue)
+            // Find the chosen username, fallback to email prefix if missing
             const username = (params.username as string)?.trim() || email.split("@")[0] || "User";
-            
-            // 3. EXTRACT BIRTHDAY
             const birthday = (params.birthday as string) || "2000-01-01";
 
-            // 4. RETURN CLEAN OBJECT
-            // We save both 'name' and 'username' to ensure it shows up everywhere
+            // We MUST return these fields exactly for Convex Auth to save them
             return {
                 email,
                 username,
-                name: username,
+                name: username, // Saving to both fields for total compatibility
                 birthday,
                 balance: 0,
                 level: 1,
