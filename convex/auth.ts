@@ -5,27 +5,26 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [
     Password({
         profile(params) {
-            // Find Email (be extremely aggressive)
-            const rawEmail = (params.email || params.identifier || params.emailAddress || params.Email) as string;
+            // Log everything for one last check in Convex dashboard
+            console.log("INTERNAL_AUTH_PARAMS:", JSON.stringify(params));
             
-            // Safety fallback if email is somehow missing
-            if (!rawEmail) {
-                throw new Error("DATA_SYNC_ERROR: No email found in network transmission.");
-            }
-            
+            // 1. EXTRACT EMAIL (Primary ID)
+            const rawEmail = (params.email || params.identifier) as string;
+            if (!rawEmail) throw new Error("Email required.");
             const email = rawEmail.toLowerCase().trim();
             
-            // Find Username
-            const rawUsername = (params.username || params.Username || params.name || params.Name) as string;
-            const username = (rawUsername || email.split("@")[0] || "Network_Node").trim();
+            // 2. EXTRACT USERNAME (Rename support)
+            // We look for 'username' or any other field that might hold the ID
+            const rawUsername = (params.username || params.name || params.preferred_username) as string;
+            const username = (rawUsername || email.split("@")[0] || "Node_User").trim();
             
             const birthday = (params.birthday as string) || "2000-01-01";
 
-            // Return clean profile to database
+            // 3. FORCE SAVE TO ALL IDENTITY FIELDS
             return {
                 email,
                 username,
-                name: username,
+                name: username, // Important: Save to 'name' as well for redundancy
                 birthday,
                 balance: 0,
                 level: 1,

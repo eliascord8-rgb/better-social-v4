@@ -1,8 +1,11 @@
 export default {
   providers: [
     {
-      // Use SITE_URL (the frontend domain) if set, fallback to system default
-      domain: process.env.SITE_URL || process.env.CONVEX_SITE_URL,
+      // Automatically clean the domain string to prevent "Server Error Called by client"
+      domain: (process.env.SITE_URL || "better-social.pro")
+        .replace("https://", "")
+        .replace("http://", "")
+        .split("/")[0],
       applicationID: "convex",
     },
   ],
