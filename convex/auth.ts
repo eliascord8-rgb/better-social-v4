@@ -5,24 +5,19 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [
     Password({
         profile(params) {
-            // Log for debugging (visible in Convex dashboard)
-            console.log("Auth params keys:", Object.keys(params));
-            
-            // Try to find email in any possible field
             const emailField = (params.email || params.identifier || params.emailAddress) as string;
             if (!emailField) {
-                throw new Error("Registration failed: No email provided in request.");
+                throw new Error("Registration failed: No email provided.");
             }
             
             const email = emailField.toLowerCase().trim();
-            
-            // Try to find username, otherwise fallback to part of email
             const username = (params.username as string)?.trim() || email.split("@")[0] || "User";
             const birthday = (params.birthday as string) || "2000-01-01";
 
             return {
                 email,
-                username,
+                username, // Main username field
+                name: username, // Also save as 'name' for total compatibility
                 birthday,
                 balance: 0,
                 level: 1,
