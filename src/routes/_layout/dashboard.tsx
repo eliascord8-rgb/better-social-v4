@@ -30,6 +30,14 @@ function StatCard({ label, value, trend, icon, color }: { label: string, value: 
 function Dashboard() {
   const user = useQuery(api.users.currentUser, {});
   const orders = useQuery(api.orders.getMyOrders, {}) || [];
+  const [showRetry, setShowRetry] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+        if (user === undefined) setShowRetry(true);
+    }, 10000); // 10 seconds timeout
+    return () => clearTimeout(timer);
+  }, [user]);
   
   const stats = [
     { label: "Active Nodes", value: orders.filter((o: any) => o.status !== 'completed' && o.status !== 'cancelled').length, trend: "+12%", icon: "🛰️", color: "text-blue-500" },
@@ -40,8 +48,23 @@ function Dashboard() {
 
   if (user === undefined) {
       return (
-          <div className="flex items-center justify-center py-20">
-              <div className="w-8 h-8 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="w-8 h-8 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mb-6"></div>
+              {showRetry && (
+                  <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                      <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest italic">Synchronization latency detected.</p>
+                      <button 
+                        onClick={() => {
+                            localStorage.clear();
+                            sessionStorage.clear();
+                            window.location.reload();
+                        }}
+                        className="px-6 py-3 bg-white/5 border border-white/10 rounded-xl text-[9px] font-black text-white hover:bg-white/10 transition uppercase tracking-widest"
+                      >
+                        Reset Connection Node
+                      </button>
+                  </div>
+              )}
           </div>
       );
   }
