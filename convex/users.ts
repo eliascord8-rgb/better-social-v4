@@ -316,38 +316,25 @@ export const resolveIdentifier = query({
   returns: v.string(),
   handler: async (ctx, args) => {
     const identifier = args.identifier.trim();
+    if (!identifier) return "";
     
-    if (identifier.includes("@")) {
-        // Try exact match first
-        const userByEmail = await ctx.db
-          .query("users")
-          .withIndex("email", (q) => q.eq("email", identifier))
-          .first();
-        if (userByEmail) return identifier;
-        
-        // Try lowercase match
-        const userByLowerEmail = await ctx.db
-          .query("users")
-          .withIndex("email", (q) => q.eq("email", identifier.toLowerCase()))
-          .first();
-        return userByLowerEmail?.email || identifier;
-    }
+    if (identifier.includes("@")) return identifier.toLowerCase();
     
-    // Try exact username match
-    let user = await ctx.db
+    // Search for username in database
+    const user = await ctx.db
       .query("users")
       .withIndex("username", (q) => q.eq("username", identifier))
+      .first() ||
+      await ctx.db
+      .query("users")
+      .withIndex("username", (q) => q.eq("username", identifier.toLowerCase()))
       .first();
       
-    if (!user) {
-        // Try lowercase username match
-        user = await ctx.db
-          .query("users")
-          .withIndex("username", (q) => q.eq("username", identifier.toLowerCase()))
-          .first();
-    }
+    // If user found, return their email for authentication
+    if (user && user.email) return user.email;
     
-    return user?.email || identifier;
+    // If no user found, return identifier as-is (might be an email without @)
+    return identifier;
   },
 });
 

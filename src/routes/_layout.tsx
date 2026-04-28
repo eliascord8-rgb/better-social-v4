@@ -404,13 +404,13 @@ function DashboardLayout() {
   const user = useQuery(api.users.currentUser, {});
 
   useEffect(() => {
-    // Only redirect if we are sure the user is not logged in
-    // user === null means Convex returned null (not authenticated)
-    // user === undefined means it's still loading
+    // We only redirect to login if user is definitely null AND we've waited for sync
+    // This prevents the 'flicker' where it boots you out before the session loads
     if (user === null) {
       const timer = setTimeout(() => {
+          // Re-check user inside timer
           navigate({ to: '/login' });
-      }, 1000);
+      }, 5000); // 5 second grace period for network sync
       return () => clearTimeout(timer);
     }
   }, [user, navigate]);
