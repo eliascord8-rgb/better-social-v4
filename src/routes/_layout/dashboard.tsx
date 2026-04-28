@@ -1,8 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
+import { useState, useEffect } from 'react'
 
 export const Route = createFileRoute('/_layout/dashboard')({
   component: Dashboard,
