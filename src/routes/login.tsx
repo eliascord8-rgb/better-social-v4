@@ -38,7 +38,7 @@ function LoginPage() {
         sessionStorage.removeItem("bs_session_id");
         setTimeout(() => {
             navigate({ to: "/dashboard" });
-        }, 500);
+        }, 1500);
     } catch (err: any) {
         setError("Invalid credentials or network error");
         setLoading(false);

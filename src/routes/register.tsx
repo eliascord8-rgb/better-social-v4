@@ -28,10 +28,10 @@ function RegisterPage() {
     signIn("password", formDataObj)
       .then(() => {
         sessionStorage.removeItem("bs_session_id");
-        // We use a small delay to ensure the session is synced
+        // We use a delay to ensure the session is synced across the system
         setTimeout(() => {
           navigate({ to: "/dashboard" });
-        }, 500);
+        }, 1500);
       })
       .catch((err) => {
         console.error("Registration error:", err);

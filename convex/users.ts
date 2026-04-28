@@ -315,12 +315,39 @@ export const resolveIdentifier = query({
   args: { identifier: v.string() },
   returns: v.string(),
   handler: async (ctx, args) => {
-    if (args.identifier.includes("@")) return args.identifier;
-    const user = await ctx.db
+    const identifier = args.identifier.trim();
+    
+    if (identifier.includes("@")) {
+        // Try exact match first
+        const userByEmail = await ctx.db
+          .query("users")
+          .withIndex("email", (q) => q.eq("email", identifier))
+          .first();
+        if (userByEmail) return identifier;
+        
+        // Try lowercase match
+        const userByLowerEmail = await ctx.db
+          .query("users")
+          .withIndex("email", (q) => q.eq("email", identifier.toLowerCase()))
+          .first();
+        return userByLowerEmail?.email || identifier;
+    }
+    
+    // Try exact username match
+    let user = await ctx.db
       .query("users")
-      .withIndex("username", (q) => q.eq("username", args.identifier))
+      .withIndex("username", (q) => q.eq("username", identifier))
       .first();
-    return user?.email || args.identifier;
+      
+    if (!user) {
+        // Try lowercase username match
+        user = await ctx.db
+          .query("users")
+          .withIndex("username", (q) => q.eq("username", identifier.toLowerCase()))
+          .first();
+    }
+    
+    return user?.email || identifier;
   },
 });
 

@@ -92,12 +92,12 @@ function GlobalSessionManager() {
                 // If we have no local SID but DB has one, adopt it (happens on refresh)
                 setLocalSessionId(user.sessionId);
                 sessionStorage.setItem("bs_session_id", user.sessionId);
-            } else if (user.sessionId !== localSessionId) {
+            } else if (user.sessionId && localSessionId && user.sessionId !== localSessionId) {
                 // Kicked logic (DB SID changed and doesn't match local)
                 sessionStorage.removeItem("bs_session_id");
                 void signOut();
                 alert("IDENTITY NODE TERMINATED: Session conflict detected or administrator override.");
-                navigate({ to: '/' });
+                navigate({ to: '/login' });
             }
 
             if (user.directAlert) {

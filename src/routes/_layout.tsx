@@ -404,8 +404,14 @@ function DashboardLayout() {
   const user = useQuery(api.users.currentUser, {});
 
   useEffect(() => {
+    // Only redirect if we are sure the user is not logged in
+    // user === null means Convex returned null (not authenticated)
+    // user === undefined means it's still loading
     if (user === null) {
-      navigate({ to: '/' });
+      const timer = setTimeout(() => {
+          navigate({ to: '/login' });
+      }, 1000);
+      return () => clearTimeout(timer);
     }
   }, [user, navigate]);
 

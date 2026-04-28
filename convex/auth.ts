@@ -6,10 +6,12 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
     Password({
         profile(params) {
             console.log("Registration profile params:", params);
-            const email = (params.email as string) || (params.identifier as string);
+            const rawEmail = (params.email as string) || (params.identifier as string);
+            const email = rawEmail?.toLowerCase().trim();
+            const username = (params.username as string)?.trim() || email?.split("@")[0] || "User";
             return {
                 email: email,
-                username: (params.username as string) || email?.split("@")[0] || "User",
+                username: username,
                 birthday: (params.birthday as string) || "2000-01-01",
                 balance: 0,
                 level: 1,
