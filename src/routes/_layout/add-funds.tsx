@@ -1,18 +1,13 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { convexQuery } from "@convex-dev/react-query";
+import { createFileRoute } from '@tanstack/react-router'
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useState } from "react";
-import { useI18n } from "../../lib/i18n";
 
 export const Route = createFileRoute('/_layout/add-funds')({
   component: AddFundsPage,
 })
 
 function AddFundsPage() {
-    const { t } = useI18n();
-    const { data: user } = useSuspenseQuery(convexQuery(api.users.currentUser, {}));
     const redeemGiftcard = useMutation(api.users.redeemGiftcard);
     const createDeposit = useMutation(api.users.createCoinPaymentsDeposit);
     const simulateSuccess = useMutation(api.users.simulateCompleteDeposit);

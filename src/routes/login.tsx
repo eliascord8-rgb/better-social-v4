@@ -15,7 +15,6 @@ function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [captchaPassed, setCaptchaPassed] = useState(false);
   const [view, setView] = useState<'login' | 'forgot' | 'resend'>('login');
-  const [success, setSuccess] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -25,7 +24,6 @@ function LoginPage() {
         return;
     }
     setError("");
-    setSuccess("");
     setLoading(true);
     
     const formData = new FormData(e.currentTarget);

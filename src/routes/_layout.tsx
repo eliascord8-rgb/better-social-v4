@@ -1,49 +1,15 @@
 import { createFileRoute, Link, Outlet, useNavigate } from '@tanstack/react-router'
 import { useAuthActions } from "@convex-dev/auth/react";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { convexQuery } from "@convex-dev/react-query";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useState, useEffect, useRef } from "react";
-import { useI18n, translations } from "../lib/i18n";
-import type { Language } from "../lib/i18n";
+import { useI18n } from "../lib/i18n";
 import type { Id } from "../../convex/_generated/dataModel";
 import { UserProfileModal } from "../components/UserProfileModal";
 
 export const Route = createFileRoute('/_layout')({
   component: DashboardLayout,
 })
-
-function LanguageSwitcher({ current, onSelect, minimal = false }: { current: Language, onSelect: (l: Language) => void, minimal?: boolean }) {
-    if (minimal) {
-        return (
-            <div className="flex items-center space-x-1 bg-slate-900/50 p-1 rounded-xl border border-slate-800">
-                {(Object.keys(translations) as Language[]).map((l) => (
-                    <button 
-                        key={l}
-                        onClick={() => onSelect(l)}
-                        className={`w-7 h-7 rounded-lg flex items-center justify-center text-sm transition-all ${current === l ? 'bg-blue-600 shadow-lg shadow-blue-900/40 opacity-100 scale-105' : 'opacity-30 hover:opacity-100 hover:bg-white/5'}`}
-                    >
-                        {translations[l].flag}
-                    </button>
-                ))}
-            </div>
-        )
-    }
-    return (
-        <div className="flex items-center space-x-3 mb-8">
-            {(Object.keys(translations) as Language[]).map((l) => (
-                <button 
-                    key={l}
-                    onClick={() => onSelect(l)}
-                    className={`w-10 h-10 rounded-2xl flex items-center justify-center text-xl border transition-all ${current === l ? 'border-blue-500 bg-blue-500/10 scale-110 shadow-lg shadow-blue-500/20' : 'border-white/5 hover:border-white/20 opacity-50 hover:opacity-100'}`}
-                >
-                    {translations[l].flag}
-                </button>
-            ))}
-        </div>
-    );
-}
 
 function SidebarLink({ to, icon, children, badge }: { to: string, icon: string, children: React.ReactNode, badge?: number }) {
     const [loading, setLoading] = useState(false);
@@ -432,7 +398,7 @@ function AdminSweetAlert({ ticket, onClose }: { ticket: any, onClose: () => void
 }
 
 function DashboardLayout() {
-  const { t, lang, setLang } = useI18n();
+  const { t } = useI18n();
   const { signOut } = useAuthActions();
   const navigate = useNavigate();
   const user = useQuery(api.users.currentUser, {});
@@ -443,7 +409,6 @@ function DashboardLayout() {
     }
   }, [user, navigate]);
 
-  const claimRakeback = useMutation(api.users.claimRakeback);
   const tickets = useQuery(api.tickets.getMyTickets, {}) || [];
   const unreadTickets = tickets.filter(t => t.hasUnreadAdminReply).length;
   const guestId = localStorage.getItem("bs_guest_id") || "GUEST";
@@ -461,7 +426,6 @@ function DashboardLayout() {
   }, [user, heartbeat]);
 
   const [showNotifications, setShowNotifications] = useState(false);
-  const [timeLeft, setTimeLeft] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatTab, setChatTab] = useState<"global" | "private">("global");
@@ -487,23 +451,6 @@ function DashboardLayout() {
         setLastTicketCount(allTickets.length);
     }
   }, [allTickets, lastTicketCount, user?.isAdmin, user?.isMod]);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-        if (user?.lastRakebackTime) {
-            const next = user.lastRakebackTime + (24 * 60 * 60 * 1000);
-            const diff = next - Date.now();
-            if (diff <= 0) {
-                setTimeLeft("CLAIM");
-                return;
-            }
-            const mins = Math.floor((diff % (60 * 60 * 1000)) / (60 * 1000));
-            const secs = Math.floor((diff % (60 * 1000)) / 1000);
-            setTimeLeft(`${mins}:${secs.toString().padStart(2, '0')}`);
-        }
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [user?.lastRakebackTime]);
 
   if (user === undefined) {
     return (

@@ -2,7 +2,7 @@ import { query, mutation, internalMutation, internalAction } from "./_generated/
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { internal } from "./_generated/api";
-import { Id } from "./_generated/dataModel";
+import type { Id } from "./_generated/dataModel";
 
 export const getMessages = query({
   args: {},
@@ -24,7 +24,7 @@ export const getMessages = query({
     
     // Reverse to get chronological order (oldest to newest)
     // so that the newest message is rendered at the bottom.
-    return messages.reverse().map(m => {
+    return messages.reverse().map((m: any) => {
         const { message, audioUrl, ...rest } = m;
         return {
             ...rest,
@@ -200,8 +200,8 @@ export const getNotifications = query({
     metadata: v.optional(v.any()),
   })),
   handler: async (ctx) => {
-    const notifications = await ctx.db.query("notifications").order("desc").take(5).collect();
-    return notifications.map(n => ({
+    const notifications = await ctx.db.query("notifications").order("desc").take(5);
+    return notifications.map((n: any) => ({
         ...n,
         isRead: n.isRead === true,
     }));
@@ -352,7 +352,15 @@ export const getConversations = query({
         userIds.add(m.senderId === userId ? m.receiverId : m.senderId);
     });
     
-    const results = [];
+    const results: {
+        userId: Id<"users">;
+        username: string;
+        image?: string;
+        lastMessage?: string;
+        lastTime: number;
+        unreadCount: number;
+    }[] = [];
+    
     for (const otherId of userIds) {
         const otherUser = await ctx.db.get(otherId as Id<"users">);
         if (!otherUser) continue;
@@ -363,8 +371,8 @@ export const getConversations = query({
         
         results.push({
             userId: otherUser._id,
-            username: (otherUser as any).username || "Guest",
-            image: (otherUser as any).image,
+            username: otherUser.username || "Guest",
+            image: otherUser.image,
             lastMessage: last.message,
             lastTime: last._creationTime,
             unreadCount: unread,

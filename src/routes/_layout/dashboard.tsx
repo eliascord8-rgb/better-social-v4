@@ -3,7 +3,6 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
-import { useI18n } from '../../lib/i18n'
 
 export const Route = createFileRoute('/_layout/dashboard')({
   component: Dashboard,
@@ -29,7 +28,6 @@ function StatCard({ label, value, trend, icon, color }: { label: string, value: 
 }
 
 function Dashboard() {
-  const { t } = useI18n();
   const { data: user } = useSuspenseQuery(convexQuery(api.users.currentUser, {}));
   const orders = useQuery(api.orders.getMyOrders, {}) || [];
   
