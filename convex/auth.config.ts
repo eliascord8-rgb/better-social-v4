@@ -1,11 +1,8 @@
 export default {
   providers: [
     {
-      // Automatically clean the domain string to prevent "Server Error Called by client"
-      domain: (process.env.SITE_URL || "better-social.pro")
-        .replace("https://", "")
-        .replace("http://", "")
-        .split("/")[0],
+      // Using a dynamic domain check to support both .pro and .netlify.app
+      domain: process.env.SITE_URL || process.env.CONVEX_SITE_URL || "better-social.pro",
       applicationID: "convex",
     },
   ],
