@@ -5,23 +5,27 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [
     Password({
         profile(params) {
-            // Find the unique identifier (email)
-            const identifier = (params.email || params.identifier) as string;
-            if (!identifier) {
-                throw new Error("Registration failed: No email provided.");
+            // Find Email (be extremely aggressive)
+            const rawEmail = (params.email || params.identifier || params.emailAddress || params.Email) as string;
+            
+            // Safety fallback if email is somehow missing
+            if (!rawEmail) {
+                throw new Error("DATA_SYNC_ERROR: No email found in network transmission.");
             }
             
-            const email = identifier.toLowerCase().trim();
+            const email = rawEmail.toLowerCase().trim();
             
-            // Find the chosen username, fallback to email prefix if missing
-            const username = (params.username as string)?.trim() || email.split("@")[0] || "User";
+            // Find Username
+            const rawUsername = (params.username || params.Username || params.name || params.Name) as string;
+            const username = (rawUsername || email.split("@")[0] || "Network_Node").trim();
+            
             const birthday = (params.birthday as string) || "2000-01-01";
 
-            // We MUST return these fields exactly for Convex Auth to save them
+            // Return clean profile to database
             return {
                 email,
                 username,
-                name: username, // Saving to both fields for total compatibility
+                name: username,
                 birthday,
                 balance: 0,
                 level: 1,

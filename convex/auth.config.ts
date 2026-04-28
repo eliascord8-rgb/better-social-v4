@@ -1,8 +1,8 @@
 export default {
   providers: [
     {
-      // The domain must be the host name WITHOUT https://
-      domain: "better-social.pro",
+      // Reverting to the system default is required for the JWT handshake to work
+      domain: process.env.CONVEX_SITE_URL,
       applicationID: "convex",
     },
   ],
