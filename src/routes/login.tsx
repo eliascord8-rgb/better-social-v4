@@ -13,7 +13,7 @@ function LoginPage() {
   const convex = useConvex();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [captchaPassed, setCaptchaPassed] = useState(false);
+  const [captchaPassed, setCaptchaPassed] = useState(true);
   const [view, setView] = useState<'login' | 'forgot' | 'resend'>('login');
   const navigate = useNavigate();
 

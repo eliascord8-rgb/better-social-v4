@@ -28,7 +28,7 @@ function StatCard({ label, value, trend, icon, color }: { label: string, value: 
 }
 
 function Dashboard() {
-  const { data: user } = useSuspenseQuery(convexQuery(api.users.currentUser, {}));
+  const user = useQuery(api.users.currentUser, {});
   const orders = useQuery(api.orders.getMyOrders, {}) || [];
   
   const stats = [
@@ -37,6 +37,14 @@ function Dashboard() {
     { label: "Elite Level", value: (user as any)?.level || 1, trend: "Ascending", icon: "🧬", color: "text-emerald-500" },
     { label: "Network XP", value: ((user as any)?.exp || 0).toLocaleString(), trend: "+240 XP", icon: "🌟", color: "text-amber-500" }
   ];
+
+  if (user === undefined) {
+      return (
+          <div className="flex items-center justify-center py-20">
+              <div className="w-8 h-8 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+          </div>
+      );
+  }
 
   return (
     <div className="space-y-10 animate-in fade-in duration-700">

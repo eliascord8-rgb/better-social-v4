@@ -17,17 +17,8 @@ function SidebarLink({ to, icon, children, badge }: { to: string, icon: string, 
     return (
         <Link 
             to={to as any} 
-            onClick={() => {
-                setLoading(true);
-                setTimeout(() => setLoading(false), 2000);
-            }}
             className="flex items-center px-4 py-3.5 text-slate-400 rounded-2xl hover:bg-blue-600/10 hover:text-blue-400 transition-all duration-300 [&.active]:bg-gradient-to-r [&.active]:from-blue-600 [&.active]:to-blue-500 [&.active]:text-white shadow-lg shadow-blue-900/10 mb-2 border border-transparent [&.active]:border-blue-400/30 group relative overflow-hidden"
         >
-            {loading && (
-                <div className="absolute inset-0 bg-blue-400 z-50 flex items-center justify-center animate-in fade-in duration-300">
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                </div>
-            )}
             <span className="mr-4 text-xl drop-shadow-md group-hover:scale-110 transition-transform">{icon}</span> 
             <span className="text-[11px] font-black uppercase tracking-wider flex-1 italic">{children}</span>
             {badge && badge > 0 ? (
@@ -614,13 +605,7 @@ function DashboardLayout() {
             <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] pointer-events-none mix-blend-overlay"></div>
             
             <div className="p-4 md:p-8 lg:p-12 max-w-7xl mx-auto pb-32">
-                <Suspense fallback={
-                    <div className="flex items-center justify-center py-20">
-                        <div className="w-8 h-8 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
-                    </div>
-                }>
-                    <Outlet />
-                </Suspense>
+                <Outlet />
             </div>
         </main>
 
