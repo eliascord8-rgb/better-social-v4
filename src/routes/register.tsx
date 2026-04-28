@@ -15,10 +15,6 @@ function RegisterPage() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!captchaPassed) {
-        setError("Please verify you are not a robot.");
-        return;
-    }
     setError("");
     setLoading(true);
     const formData = new FormData(e.currentTarget);
@@ -64,7 +60,7 @@ function RegisterPage() {
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Network Identity</label>
+              <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Username</label>
               <input
                 name="username"
                 type="text"
@@ -74,7 +70,7 @@ function RegisterPage() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Sync Email</label>
+              <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Email</label>
               <input
                 name="email"
                 type="email"
@@ -83,19 +79,17 @@ function RegisterPage() {
                 placeholder="identity@network.com"
               />
             </div>
-            <div className="grid grid-cols-1 gap-4">
-                <div className="space-y-2">
-                  <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Creation Date</label>
-                  <input
-                    name="birthday"
-                    type="date"
-                    required
-                    className="w-full px-5 py-4 bg-zinc-950 border border-white/5 text-white rounded-2xl focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all text-sm font-medium"
-                  />
-                </div>
+            <div className="space-y-2">
+              <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Date of Birth</label>
+              <input
+                name="birthday"
+                type="date"
+                required
+                className="w-full px-5 py-4 bg-zinc-950 border border-white/5 text-white rounded-2xl focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all text-sm font-medium"
+              />
             </div>
             <div className="space-y-2">
-              <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Access Phrase</label>
+              <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Password</label>
               <input
                 name="password"
                 type="password"
@@ -105,18 +99,6 @@ function RegisterPage() {
                 placeholder="Min. 8 characters"
               />
             </div>
-          </div>
-
-          <div className="bg-zinc-950/50 p-4 rounded-2xl border border-white/5 flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <input 
-                    type="checkbox" 
-                    id="captcha" 
-                    onChange={(e) => setCaptchaPassed(e.target.checked)}
-                    className="w-5 h-5 rounded-lg border-white/10 bg-zinc-900 text-blue-600 focus:ring-blue-500 transition-all cursor-pointer" 
-                />
-                <label htmlFor="captcha" className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest cursor-pointer select-none">Intelligence Check</label>
-              </div>
           </div>
 
           {error && (
