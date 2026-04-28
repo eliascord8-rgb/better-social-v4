@@ -27,14 +27,15 @@ function LoginPage() {
     setLoading(true);
     
     const formData = new FormData(e.currentTarget);
-    const identifier = formData.get("email") as string;
+    const data = Object.fromEntries(formData.entries());
+    const identifier = data.email as string;
 
     try {
         const resolvedEmail = await convex.query(api.users.resolveIdentifier, { identifier });
-        formData.set("email", resolvedEmail);
-        formData.set("flow", "signIn");
+        (data as any).email = resolvedEmail;
+        (data as any).flow = "signIn";
         
-        await signIn("password", formData);
+        await signIn("password", data);
         sessionStorage.removeItem("bs_session_id");
         setTimeout(() => {
             navigate({ to: "/dashboard" });
