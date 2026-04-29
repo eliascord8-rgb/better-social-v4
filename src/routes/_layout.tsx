@@ -338,6 +338,23 @@ function DashboardLayout() {
     setChatOpen(true);
   };
 
+  useEffect(() => {
+    if (user === null) {
+      navigate({ to: '/login' });
+    }
+  }, [user, navigate]);
+
+  if (user === undefined) {
+    return (
+        <div className="flex h-screen w-screen items-center justify-center bg-[#030712]">
+            <div className="flex flex-col items-center space-y-4">
+                <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white font-black animate-pulse">BS</div>
+                <div className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] italic animate-pulse">Synchronizing Node...</div>
+            </div>
+        </div>
+    );
+  }
+
   if (user === null) return null;
 
   return (
