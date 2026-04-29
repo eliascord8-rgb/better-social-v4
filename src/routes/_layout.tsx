@@ -345,14 +345,7 @@ function DashboardLayout() {
   }, [user, navigate]);
 
   if (user === undefined) {
-    return (
-        <div className="flex h-screen w-screen items-center justify-center bg-[#030712]">
-            <div className="flex flex-col items-center space-y-4">
-                <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white font-black animate-pulse">BS</div>
-                <div className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] italic animate-pulse">Synchronizing Node...</div>
-            </div>
-        </div>
-    );
+    return <div className="min-h-screen bg-[#030712]"></div>;
   }
 
   if (user === null) return null;
@@ -406,6 +399,7 @@ function DashboardLayout() {
                 <div className="flex-1 min-w-0">
                     <div className="text-[11px] font-bold text-white truncate">{user?.username}</div>
                     <div className="text-[9px] text-blue-400 font-bold uppercase tracking-widest mt-0.5">Lv. {user?.level || 1} Elite</div>
+                    <div className="text-[7px] text-zinc-500 truncate mt-0.5 lowercase">{user?.email}</div>
                 </div>
             </Link>
             <button 
