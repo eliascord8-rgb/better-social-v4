@@ -306,7 +306,7 @@ function CommunityChat({
     )
 }
 
-function GlobalLayout() {
+function DashboardLayout() {
   const { signOut } = useAuthActions();
   const navigate = useNavigate();
   const user = useQuery(api.users.currentUser, {});
@@ -328,18 +328,9 @@ function GlobalLayout() {
   }, [user, heartbeat]);
 
   const [showNotifications, setShowNotifications] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatTab, setChatTab] = useState<"global" | "private">("global");
   const [chatPrivateUser, setChatPrivateUser] = useState<Id<"users"> | null>(null);
-  const [selectedUserId, setSelectedUserId] = useState<Id<"users"> | null>(null);
-
-  const handleMessageRequest = (targetId: Id<"users">) => {
-    setChatTab("private");
-    setChatPrivateUser(targetId);
-    setChatOpen(true);
-    setSelectedUserId(null);
-  };
 
   if (user === null) return null;
 
