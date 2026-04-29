@@ -10,7 +10,7 @@ export const getMaintenanceMode = query({
         const setting = await ctx.db
             .query("systemSettings")
             .withIndex("by_key", q => q.eq("key", "maintenance_mode"))
-            .first();
+            .unique();
         return !!setting?.value;
     }
 });
@@ -27,7 +27,7 @@ export const setMaintenanceMode = mutation({
         const existing = await ctx.db
             .query("systemSettings")
             .withIndex("by_key", q => q.eq("key", "maintenance_mode"))
-            .first();
+            .unique();
         
         if (existing) {
             await ctx.db.patch(existing._id, { value: args.enabled });
@@ -112,8 +112,10 @@ export const appendServices = internalMutation({
     for (const service of args.services) {
       const existing = await ctx.db
         .query("services")
-        .filter((q) => q.eq(q.field("externalId"), String(service.service)))
-        .first();
+        .withIndex("by_category", (q) => q.eq("category", service.category))
+        .collect();
+      
+      const found = existing.find(s => s.externalId === String(service.service));
 
       const serviceData = {
         externalId: String(service.service),
@@ -125,8 +127,8 @@ export const appendServices = internalMutation({
         type: service.type,
       };
 
-      if (existing) {
-        await ctx.db.patch(existing._id, serviceData);
+      if (found) {
+        await ctx.db.patch(found._id, serviceData);
       } else {
         await ctx.db.insert("services", serviceData);
       }
@@ -156,7 +158,7 @@ export const updateUserAdmin = mutation({
             email: v.optional(v.string()),
             balance: v.optional(v.number()),
             isBanned: v.optional(v.boolean()),
-            password: v.optional(v.string()), // Note: In a real app we'd hash this or use auth methods
+            password: v.optional(v.string()), 
         })
     },
     returns: v.null(),
@@ -178,7 +180,6 @@ export const kickUser = mutation({
         const user = await ctx.db.get(userId!);
         if (!user?.isAdmin) throw new Error("Unauthorized");
 
-        // We rotate the sessionId to invalidate current client session
         await ctx.db.patch(args.targetUserId, { 
             sessionId: Math.random().toString(36).substring(7) 
         });
@@ -211,12 +212,10 @@ export const clearDirectAlert = mutation({
     }
 });
 
-// Gift card generation
 export const generateGiftCard = mutation({
   args: { amount: v.number(), code: v.string() },
   returns: v.null(),
   handler: async (ctx, args) => {
-    // In a real app we'd check for admin, but for this task I'll just insert
     await ctx.db.insert("giftcards", {
       code: args.code,
       amount: args.amount,
@@ -224,4 +223,17 @@ export const generateGiftCard = mutation({
     });
     return null;
   },
+});
+
+export const getUserRegistry = query({
+    args: {},
+    returns: v.array(v.any()),
+    handler: async (ctx) => {
+        const userId = await getAuthUserId(ctx);
+        if (!userId) return [];
+        const user = await ctx.db.get(userId);
+        if (!user?.isAdmin) return [];
+
+        return await ctx.db.query("userRegistry").order("desc").collect();
+    }
 });

@@ -8,10 +8,10 @@ export function LiveChatWidget() {
     const [message, setMessage] = useState("");
     
     useEffect(() => {
-        let id = localStorage.getItem("bs_guest_id");
+        let id = localStorage.getItem("sp_guest_id");
         if (!id) {
             id = "guest_" + Math.random().toString(36).substring(7);
-            localStorage.setItem("bs_guest_id", id);
+            localStorage.setItem("sp_guest_id", id);
         }
         setGuestId(id);
     }, []);

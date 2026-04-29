@@ -1,220 +1,203 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useQuery, useMutation } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import React, { useState, useMemo, useEffect } from "react";
+import { createFileRoute } from '@tanstack/react-router'
+import { useState } from 'react'
+import { Authenticated, Unauthenticated, useMutation } from "convex/react";
+import { useNavigate } from '@tanstack/react-router'
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { convexQuery } from '@convex-dev/react-query'
+import { api } from '../../../convex/_generated/api'
 
 export const Route = createFileRoute('/_layout/new-order')({
   component: NewOrderPage,
 })
 
 function NewOrderPage() {
-  const categories = useQuery(api.orders.getCategories, {});
-  const submitOrder = useMutation(api.orders.submitOrder);
   const navigate = useNavigate();
+  return (
+      <>
+        <Authenticated>
+            <NewOrderContent />
+        </Authenticated>
+        <Unauthenticated>
+            <div className="min-h-[60vh] flex items-center justify-center p-6 text-center">
+                <div className="bg-white p-10 rounded-[32px] shadow-xl border border-slate-100 max-w-md w-full animate-in zoom-in duration-300">
+                    <div className="text-4xl mb-4">🔒</div>
+                    <h1 className="text-2xl font-black text-slate-900 mb-2 italic tracking-tight uppercase">Access Restricted</h1>
+                    <p className="text-slate-500 mb-8 font-medium">Authentication required to access the order terminal.</p>
+                    <button 
+                        onClick={() => navigate({ to: '/login' })}
+                        className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl shadow-lg"
+                    >
+                        Access Terminal
+                    </button>
+                </div>
+            </div>
+        </Unauthenticated>
+      </>
+  )
+}
 
-  const [selectedCategory, setSelectedCategory] = useState("");
-  
-  useEffect(() => {
-    if (categories && categories.length > 0 && !selectedCategory) {
-        setSelectedCategory(categories[0]);
-    }
-  }, [categories, selectedCategory]);
-
-  const rawServices = useQuery(
-    api.orders.getServicesByCategory, 
-    selectedCategory ? { category: selectedCategory } : "skip" as any
-  ) || [];
-
-  // Filter for only Service 7242
-  const services = useMemo(() => {
-    return rawServices.filter(s => s.externalId === "7242");
-  }, [rawServices]);
-
-  const [selectedServiceId, setSelectedServiceId] = useState("");
+function NewOrderContent() {
+  const [loading, setLoading] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedServiceId, setSelectedServiceId] = useState<string>("");
   const [link, setLink] = useState("");
   const [quantity, setQuantity] = useState<number>(0);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
-  const selectedService = useMemo(() => {
-    return services.find(s => s._id === selectedServiceId) || services[0];
-  }, [services, selectedServiceId]);
+  const { data: categories } = useSuspenseQuery(convexQuery(api.orders.getCategories, {})) as { data: string[] };
+  const { data: services } = useSuspenseQuery(
+      convexQuery(api.orders.getServicesByCategory, { category: selectedCategory || (categories[0] || "") })
+  ) as { data: any[] };
 
-  useEffect(() => {
-    if (services.length > 0 && !services.find(s => s._id === selectedServiceId)) {
-        setSelectedServiceId(services[0]._id);
-    }
-  }, [services, selectedServiceId]);
+  const submitOrder = useMutation(api.orders.submitOrder);
 
-  const totalPrice = useMemo(() => {
-    if (!selectedService || !quantity) return 0;
-    return (Number(selectedService.rate) / 1000) * quantity;
-  }, [selectedService, quantity]);
+  const selectedService = services.find(s => s._id === selectedServiceId);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedServiceId || !link || quantity <= 0) {
-        setMessage("Error: Please fill all fields correctly.");
+    if (!selectedServiceId) {
+        setError("Please select a service");
         return;
     }
-
     setLoading(true);
-    setMessage("");
+    setError(null);
+    setSuccess(null);
+    
     try {
         await submitOrder({
             serviceId: selectedServiceId as any,
             quantity,
-            link
+            link,
         });
-        setMessage("Transmission successful! Signal queued in the network.");
+        setSuccess("Order submitted successfully!");
         setLink("");
         setQuantity(0);
-        setTimeout(() => navigate({ to: "/orders" }), 2000);
     } catch (err: any) {
-        setMessage("Error: " + err.message);
+        setError(err.message || "Failed to submit order");
     } finally {
         setLoading(false);
     }
-  }
-
-  const filteredCategories = useMemo(() => {
-    return categories;
-  }, [categories]);
-
-  if (categories === undefined) {
-      return (
-          <div className="flex items-center justify-center py-32">
-              <div className="w-10 h-10 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
-          </div>
-      );
-  }
-
-  if (categories.length === 0) {
-      return (
-          <div className="text-center py-32 bg-zinc-900/40 rounded-[40px] border border-white/5 shadow-2xl animate-in zoom-in">
-              <div className="w-20 h-20 bg-zinc-950 border border-white/5 rounded-full flex items-center justify-center text-3xl mx-auto mb-6 shadow-xl">📡</div>
-              <h2 className="text-2xl font-black text-white italic uppercase tracking-tighter">Network Offline</h2>
-              <p className="text-zinc-500 mt-2 font-bold uppercase text-[9px] tracking-widest">Awaiting synchronization of global infrastructure.</p>
-          </div>
-      )
-  }
+  };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-700">
-      <div className="bg-zinc-900/40 p-8 rounded-[32px] border border-white/5 shadow-2xl relative overflow-hidden group">
-        <div className="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
-        <div className="relative z-10">
-          <h1 className="text-3xl font-black text-white tracking-tighter uppercase italic leading-none">Signal <span className="text-blue-500">Deployment</span></h1>
-          <p className="text-zinc-500 mt-1.5 text-[9px] font-bold uppercase tracking-widest">Configure high-frequency social protocols.</p>
-        </div>
-      </div>
-
-      <form onSubmit={handleSubmit} className="bg-zinc-900/40 rounded-[32px] border border-white/5 p-8 lg:p-10 space-y-8 shadow-2xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 blur-[80px] rounded-full pointer-events-none"></div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-                <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Protocol Category</label>
-                <div className="relative">
-                    <select 
-                        value={selectedCategory}
-                        onChange={(e) => setSelectedCategory(e.target.value)}
-                        className="block w-full px-5 py-4 bg-zinc-950 border border-white/5 text-white rounded-2xl focus:outline-none focus:ring-1 focus:ring-blue-500 transition appearance-none font-bold text-sm"
-                    >
-                        {filteredCategories.map(c => (
-                            <option key={c} value={c}>{c}</option>
-                        ))}
-                    </select>
-                    <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-600 text-xs">▼</div>
-                </div>
-            </div>
-
-            <div className="space-y-2">
-                <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Signal Prototype</label>
-                <div className="relative">
-                    <select 
-                        value={selectedServiceId}
-                        onChange={(e) => setSelectedServiceId(e.target.value)}
-                        className="block w-full px-5 py-4 bg-zinc-950 border border-white/5 text-white rounded-2xl focus:outline-none focus:ring-1 focus:ring-blue-500 transition appearance-none font-bold text-sm"
-                    >
-                        {services.length > 0 ? services.map(s => (
-                            <option key={s._id} value={s._id}>
-                                {s.name} - ${s.rate}/1k
-                            </option>
-                        )) : (
-                            <option disabled value="">No active signals</option>
-                        )}
-                    </select>
-                    <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-600 text-xs">▼</div>
-                </div>
-            </div>
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="bg-white p-10 rounded-[40px] shadow-sm border border-slate-100 max-w-2xl">
+        <div className="mb-10">
+          <h1 className="text-3xl font-bold text-slate-900 mb-2 italic tracking-tight">New Order</h1>
+          <p className="text-slate-500">Initialize a new service request to the network core.</p>
         </div>
 
-        {selectedService && (
-            <div className="bg-zinc-950/60 p-6 rounded-2xl border border-white/5 grid grid-cols-1 md:grid-cols-3 gap-6 relative group">
-                <div className="space-y-1">
-                    <div className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Protocol ID</div>
-                    <div className="text-white font-bold italic tracking-tight">{selectedService.externalId}</div>
-                </div>
-                <div className="space-y-1 border-y md:border-y-0 md:border-x border-white/5 py-3 md:py-0 md:px-6">
-                    <div className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Range</div>
-                    <div className="text-blue-500 font-bold italic tracking-tight">{selectedService.min} — {selectedService.max}</div>
-                </div>
-                <div className="space-y-1 md:text-right">
-                    <div className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Rate (1k)</div>
-                    <div className="text-white font-bold italic tracking-tight text-base">${selectedService.rate}</div>
-                </div>
+        {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl text-sm font-bold">
+                ⚠️ {error}
             </div>
         )}
 
-        <div className="space-y-6">
-            <div className="space-y-2">
-                <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Target Destination</label>
-                <input 
-                    value={link}
-                    onChange={(e) => setLink(e.target.value)}
-                    placeholder="https://www.social.com/p/..."
-                    className="block w-full px-5 py-4 bg-zinc-950 border border-white/5 text-white rounded-2xl focus:outline-none focus:ring-1 focus:ring-blue-500 transition font-medium italic text-sm"
-                    required
-                />
+        {success && (
+            <div className="mb-6 p-4 bg-green-50 border border-green-100 text-green-600 rounded-2xl text-sm font-bold">
+                ✅ {success}
+            </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="grid grid-cols-1 gap-6">
+            <div>
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 ml-1">Category</label>
+              <select 
+                value={selectedCategory}
+                onChange={(e) => {
+                    setSelectedCategory(e.target.value);
+                    setSelectedServiceId("");
+                }}
+                className="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-slate-50 font-bold text-slate-900 appearance-none shadow-sm cursor-pointer"
+              >
+                <option value="">Select Category</option>
+                {categories.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
             </div>
 
-            <div className="space-y-2">
-                <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Deployment Quantity</label>
-                <input 
-                    type="number"
-                    value={quantity || ""}
-                    onChange={(e) => setQuantity(Number(e.target.value))}
-                    placeholder={`Min: ${selectedService?.min || 100}`}
-                    className="block w-full px-5 py-4 bg-zinc-950 border border-white/5 text-white rounded-2xl focus:outline-none focus:ring-1 focus:ring-blue-500 transition font-medium italic text-sm"
-                    required
-                />
+            <div>
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 ml-1">Service</label>
+              <select 
+                value={selectedServiceId}
+                onChange={(e) => setSelectedServiceId(e.target.value)}
+                disabled={!selectedCategory}
+                className="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-slate-50 font-bold text-slate-900 appearance-none shadow-sm cursor-pointer disabled:opacity-50"
+              >
+                <option value="">Select Service</option>
+                {services.map(svc => (
+                    <option key={svc._id} value={svc._id}>{svc.name} - ${svc.rate}/1k</option>
+                ))}
+              </select>
             </div>
-        </div>
 
-        <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="text-left">
-                <span className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest block mb-1">Fuel Requirement</span>
-                <div className="flex items-baseline space-x-2">
-                    <span className="text-4xl font-black text-white italic tracking-tighter">${totalPrice.toFixed(3)}</span>
-                    <span className="text-[8px] text-blue-500 font-bold uppercase animate-pulse">Ready</span>
-                </div>
+            <div>
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 ml-1">Description</label>
+              <div className="w-full px-6 py-5 rounded-2xl border border-slate-200 bg-slate-50 min-h-[120px] text-slate-500 text-sm font-medium leading-relaxed border-dashed">
+                {selectedService ? (
+                    <div className="space-y-2">
+                        <p className="font-bold text-slate-900">Execution Specs:</p>
+                        <p>• Rate: ${selectedService.rate} per 1,000 units</p>
+                        <p>• Limits: {selectedService.min} - {selectedService.max}</p>
+                        <p>• Type: {selectedService.type}</p>
+                    </div>
+                ) : (
+                    "Select a service to view detailed execution parameters and system requirements..."
+                )}
+              </div>
             </div>
-            <button 
-                type="submit"
-                disabled={loading || !selectedService}
-                className="w-full md:w-auto px-12 py-5 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-500 transition-all shadow-xl shadow-blue-600/20 disabled:opacity-50 uppercase text-[10px] italic tracking-widest active:scale-95"
+
+            <div>
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 ml-1">Link / URL</label>
+              <input
+                type="url"
+                required
+                value={link}
+                onChange={(e) => setLink(e.target.value)}
+                placeholder="https://example.com/target-node"
+                className="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-slate-50 font-bold text-slate-900 shadow-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 ml-1">Quantity</label>
+              <input
+                type="number"
+                required
+                min={selectedService ? Number(selectedService.min) : 0}
+                max={selectedService ? Number(selectedService.max) : 999999}
+                value={quantity || ''}
+                onChange={(e) => setQuantity(Number(e.target.value))}
+                placeholder="0"
+                className="w-full px-6 py-4 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-slate-50 font-bold text-slate-900 shadow-sm"
+              />
+              {selectedService && (
+                  <p className="mt-2 text-xs font-bold text-slate-400">
+                    ESTIMATED COST: <span className="text-blue-600">${((Number(selectedService.rate) / 1000) * quantity).toFixed(4)}</span>
+                  </p>
+              )}
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-slate-50">
+            <button
+              type="submit"
+              disabled={loading || !selectedServiceId}
+              className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 transition shadow-xl shadow-blue-600/20 uppercase tracking-widest text-xs disabled:opacity-50 flex items-center justify-center gap-2"
             >
-                {loading ? "PROCESSING..." : "EXECUTE DEPLOYMENT"}
+              {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                    Processing Request...
+                  </>
+              ) : 'Submit Request to Core'}
             </button>
-        </div>
-
-        {message && (
-            <div className={`p-4 rounded-xl font-bold text-[9px] uppercase tracking-widest text-center animate-in slide-in-from-top-4 ${message.startsWith("Error") ? "bg-red-500/10 text-red-500 border border-red-500/20" : "bg-green-500/10 text-green-500 border border-green-500/20"}`}>
-                {message}
-            </div>
-        )}
-      </form>
+          </div>
+        </form>
+      </div>
     </div>
   )
 }

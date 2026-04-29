@@ -4,54 +4,11 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const currentUser = query({
   args: {},
-  returns: v.union(v.null(), v.object({
-    _id: v.id("users"),
-    username: v.string(),
-    email: v.string(),
-    balance: v.number(),
-    isAdmin: v.optional(v.boolean()),
-    isMod: v.optional(v.boolean()),
-    isMuted: v.optional(v.boolean()),
-    isBanned: v.optional(v.boolean()),
-    birthday: v.optional(v.string()),
-    sessionId: v.optional(v.union(v.string(), v.null())),
-    directAlert: v.optional(v.union(v.string(), v.null())),
-    image: v.optional(v.string()),
-    level: v.optional(v.number()),
-    exp: v.optional(v.number()),
-    totalDeposited: v.optional(v.number()),
-    isKycVerified: v.optional(v.boolean()),
-    rakebackBalance: v.optional(v.number()),
-    lastRakebackTime: v.optional(v.number()),
-    muteUntil: v.optional(v.number()),
-  })),
+  returns: v.any(),
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) return null;
-    const user = await ctx.db.get(userId);
-    if (!user) return null;
-    
-    return {
-      _id: user._id,
-      username: user.username || "Guest",
-      email: user.email || "",
-      balance: user.balance || 0,
-      isAdmin: user.isAdmin,
-      isMod: user.isMod,
-      isMuted: user.isMuted,
-      isBanned: user.isBanned,
-      birthday: user.birthday,
-      sessionId: user.sessionId,
-      directAlert: user.directAlert,
-      image: user.image,
-      level: user.level,
-      exp: user.exp,
-      totalDeposited: user.totalDeposited,
-      isKycVerified: user.isKycVerified,
-      rakebackBalance: user.rakebackBalance,
-      lastRakebackTime: user.lastRakebackTime,
-      muteUntil: user.muteUntil,
-    };
+    return await ctx.db.get(userId);
   },
 });
 
@@ -117,16 +74,16 @@ export const redeemGiftcard = mutation({
     if (!card || card.isUsed) throw new Error("Invalid or used code");
     
     const user = await ctx.db.get(userId);
-    let amountToAdd = card.amount;
+    let amountToAdd = card.amount || 0;
     
     // Apply 40% bonus for redemptions of $100 or more
-    if (card.amount >= 100) {
-        amountToAdd = card.amount * 1.4;
+    if (amountToAdd >= 100) {
+        amountToAdd = amountToAdd * 1.4;
     }
 
     await ctx.db.patch(userId, { 
-        balance: (user?.balance || 0) + amountToAdd,
-        totalDeposited: (user?.totalDeposited || 0) + card.amount
+        balance: ((user as any)?.balance || 0) + amountToAdd,
+        totalDeposited: ((user as any)?.totalDeposited || 0) + (card.amount || 0)
     });
     await ctx.db.patch(card._id, { isUsed: true, usedBy: userId });
     return amountToAdd;
@@ -174,19 +131,19 @@ export const simulateCompleteDeposit = mutation({
     if (!deposit) throw new Error("Deposit not found");
     if (deposit.status !== "pending") return null;
 
-    const user = await ctx.db.get(deposit.userId);
+    const user = await ctx.db.get(deposit.userId as any);
     if (!user) throw new Error("User not found");
 
     await ctx.db.patch(deposit._id, { status: "completed" });
     await ctx.db.patch(user._id, {
-        balance: (user.balance || 0) + deposit.total,
-        totalDeposited: (user.totalDeposited || 0) + deposit.amount,
+        balance: ((user as any).balance || 0) + (deposit.total || 0),
+        totalDeposited: ((user as any).totalDeposited || 0) + (deposit.amount || 0),
     });
 
     await ctx.db.insert("communityMessages", {
         userId: user._id,
         username: "SYSTEM",
-        message: `Node ${user.username?.slice(0,3)}*** refueled ${deposit.total.toFixed(2)} USD via Crypto! ⚡`,
+        message: `Node ${(user as any).username?.slice(0,3)}*** refueled ${(deposit.total || 0).toFixed(2)} USD via Crypto! ⚡`,
         role: "system",
         level: 999,
     });
@@ -221,19 +178,19 @@ export const internalCompleteDeposit = internalMutation({
     if (!deposit) return null;
     if (deposit.status !== "pending") return null;
 
-    const user = await ctx.db.get(deposit.userId);
+    const user = await ctx.db.get(deposit.userId as any);
     if (!user) return null;
 
     await ctx.db.patch(deposit._id, { status: "completed" });
     await ctx.db.patch(user._id, {
-        balance: (user.balance || 0) + deposit.total,
-        totalDeposited: (user.totalDeposited || 0) + deposit.amount,
+        balance: ((user as any).balance || 0) + (deposit.total || 0),
+        totalDeposited: ((user as any).totalDeposited || 0) + (deposit.amount || 0),
     });
 
     await ctx.db.insert("communityMessages", {
         userId: user._id,
         username: "SYSTEM",
-        message: `Node ${user.username?.slice(0,3)}*** refueled ${deposit.total.toFixed(2)} USD via Crypto! ⚡`,
+        message: `Node ${(user as any).username?.slice(0,3)}*** refueled ${(deposit.total || 0).toFixed(2)} USD via Crypto! ⚡`,
         role: "system",
         level: 999,
     });
@@ -254,17 +211,17 @@ export const sendTip = mutation({
     const sender = await ctx.db.get(userId);
     const receiver = await ctx.db.get(args.targetUserId);
 
-    if (!sender || (sender.balance || 0) < args.amount) {
+    if (!sender || ((sender as any).balance || 0) < args.amount) {
       throw new Error("Insufficient balance");
     }
 
-    await ctx.db.patch(userId, { balance: (sender.balance || 0) - args.amount });
-    await ctx.db.patch(args.targetUserId, { balance: (receiver?.balance || 0) + args.amount });
+    await ctx.db.patch(userId, { balance: ((sender as any).balance || 0) - args.amount });
+    await ctx.db.patch(args.targetUserId, { balance: ((receiver as any)?.balance || 0) + args.amount });
 
     await ctx.db.insert("notifications", {
       userId: args.targetUserId,
       type: "dm",
-      content: `${sender.username} sent you a tip of ${args.amount.toFixed(2)}! 💰`,
+      content: `${(sender as any).username} sent you a tip of ${args.amount.toFixed(2)}! 💰`,
       isRead: false,
       metadata: { fromId: userId },
     });
@@ -272,7 +229,7 @@ export const sendTip = mutation({
     await ctx.db.insert("communityMessages", {
         userId,
         username: "SYSTEM",
-        message: `${sender.username} tipped ${receiver?.username} ${args.amount.toFixed(2)}! 💎`,
+        message: `${(sender as any).username} tipped ${(receiver as any)?.username} ${args.amount.toFixed(2)}! 💎`,
         role: "system",
         level: 999,
     });
@@ -331,7 +288,7 @@ export const resolveIdentifier = query({
       .first();
       
     // If user found, return their email for authentication
-    if (user && user.email) return user.email;
+    if (user && (user as any).email) return (user as any).email;
     
     // If no user found, return identifier as-is (might be an email without @)
     return identifier;
@@ -344,7 +301,7 @@ export const addDeposit = mutation({
   handler: async (ctx, args) => {
     const callerId = await getAuthUserId(ctx);
     const caller = await ctx.db.get(callerId!);
-    if (!caller?.isAdmin) throw new Error("Unauthorized");
+    if (!(caller as any)?.isAdmin) throw new Error("Unauthorized");
 
     const user = await ctx.db.get(args.userId);
     if (!user) throw new Error("User not found");
@@ -356,14 +313,14 @@ export const addDeposit = mutation({
     }
 
     await ctx.db.patch(args.userId, {
-        balance: (user.balance || 0) + amountToAdd,
-        totalDeposited: (user.totalDeposited || 0) + args.amount,
+        balance: ((user as any).balance || 0) + amountToAdd,
+        totalDeposited: ((user as any).totalDeposited || 0) + args.amount,
     });
 
     await ctx.db.insert("communityMessages", {
         userId: args.userId,
         username: "SYSTEM",
-        message: `Node ${user.username?.slice(0,3)}*** refueled ${amountToAdd.toFixed(2)} USD via ${args.type}! ⚡`,
+        message: `Node ${(user as any).username?.slice(0,3)}*** refueled ${amountToAdd.toFixed(2)} USD via ${args.type}! ⚡`,
         role: "system",
         level: 999,
     });
@@ -395,6 +352,23 @@ export const syncSession = mutation({
     const userId = await getAuthUserId(ctx);
     if (userId) {
       await ctx.db.patch(userId, { sessionId: args.sessionId });
+      
+      // Also ensure they are in the userRegistry
+      const user = await ctx.db.get(userId);
+      if (user) {
+        const existing = await ctx.db
+            .query("userRegistry")
+            .withIndex("by_userId", (q) => q.eq("userId", userId))
+            .first();
+        if (!existing) {
+            await ctx.db.insert("userRegistry", {
+                userId,
+                username: (user as any).username || "Guest",
+                email: (user as any).email || null,
+                registrationTime: Date.now(),
+            });
+        }
+      }
     }
     return null;
   },
@@ -421,8 +395,8 @@ export const getPresence = query({
   handler: async (ctx, args) => {
     const user = await ctx.db.get(args.userId);
     if (!user) return null;
-    const isOnline = !!user.lastSeen && Date.now() - user.lastSeen < 60000; // 1 minute threshold
-    return { isOnline, lastSeen: user.lastSeen };
+    const isOnline = !!(user as any).lastSeen && Date.now() - (user as any).lastSeen < 60000; // 1 minute threshold
+    return { isOnline, lastSeen: (user as any).lastSeen };
   },
 });
 

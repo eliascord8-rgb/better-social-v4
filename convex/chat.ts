@@ -213,7 +213,7 @@ const BOT_USERNAMES = ["SmmKing", "SocialPro", "AdsExpert", "GrowthHacker", "Vir
 const BOT_MESSAGES = [
     "Just boosted 10k followers for a client! 🔥",
     "Is the API syncing correctly?",
-    "Better Social is the best panel I've used so far.",
+    "Serene Peony is the best panel I've used so far.",
     "Anyone tried the new TikTok services?",
     "Leveling up feels good! 🚀",
     "Support team answered my ticket in 5 mins, wow.",

@@ -1,6 +1,6 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
 import { useAuthActions } from "@convex-dev/auth/react";
-import React, { useState } from "react";
+import { useState, FormEvent } from 'react'
 
 export const Route = createFileRoute('/register')({
   component: RegisterPage,
@@ -8,110 +8,72 @@ export const Route = createFileRoute('/register')({
 
 function RegisterPage() {
   const { signIn } = useAuthActions();
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [captchaPassed, setCaptchaPassed] = useState(false);
   const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
+    setError(null);
     setLoading(true);
+
     const formData = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formData.entries());
-    (data as any).flow = "signUp";
-    
-    signIn("password", data)
-      .then(() => {
-        sessionStorage.removeItem("bs_session_id");
-        // Extended delay for network propagation
-        setTimeout(() => {
-          navigate({ to: "/dashboard" });
-        }, 2500);
-      })
-      .catch((err) => {
-        // If the error is 'Server Error Called by client', it often actually worked!
-        // We check if it created the user anyway.
-        if (err.message?.includes("Server Error") || err.message?.includes("client")) {
-            console.log("Possible false negative, attempting sync...");
-            setTimeout(() => {
-                navigate({ to: "/dashboard" });
-            }, 2500);
-            return;
-        }
-        console.error("Registration error:", err);
-        setError(err.message || "Email might already be in use.");
-        setLoading(false);
-      });
+    const email = formData.get("email") as string;
+    const username = formData.get("username") as string;
+    const password = formData.get("password") as string;
+
+    try {
+      await signIn("password", { email, username, password, flow: "signUp" });
+      navigate({ to: '/dashboard' });
+    } catch (err: any) {
+      setError(err.message || "Registration failed");
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#030712] px-6 relative overflow-hidden font-sans selection:bg-blue-500 selection:text-white">
-      {/* Background Ambience */}
-      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-600/5 blur-[120px] rounded-full animate-pulse"></div>
-      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-indigo-600/5 blur-[120px] rounded-full animate-pulse delay-700"></div>
-
-      <div className="max-w-md w-full bg-zinc-900/40 backdrop-blur-3xl p-8 lg:p-12 rounded-[40px] border border-white/5 shadow-2xl relative z-10 animate-in fade-in zoom-in-95 duration-500">
-        <div className="text-center mb-10">
-          <Link to="/" className="inline-flex items-center space-x-3 group mb-8">
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-[10px] font-black text-white group-hover:rotate-12 transition-all shadow-lg shadow-blue-600/30">BS</div>
-            <span className="text-xl font-black text-white tracking-tighter uppercase italic">Better<span className="text-blue-500">Social</span></span>
-          </Link>
-          
-          <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-2">
-            Establish Node
-          </h2>
-          <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest italic">
-            Join the digital social infrastructure.
-          </p>
+    <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
+      <div className="max-w-md w-full bg-white p-8 rounded-3xl shadow-xl border border-slate-100">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-slate-900">Register</h2>
+          <p className="text-slate-500 mt-2">Join us today!</p>
         </div>
 
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Username</label>
-              <input
-                name="username"
-                type="text"
-                required
-                className="w-full px-5 py-4 bg-zinc-950 border border-white/5 text-white rounded-2xl focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all text-sm font-medium"
-                placeholder="Unique identifier"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Email</label>
-              <input
-                name="email"
-                type="email"
-                required
-                className="w-full px-5 py-4 bg-zinc-950 border border-white/5 text-white rounded-2xl focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all text-sm font-medium"
-                placeholder="identity@network.com"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Date of Birth</label>
-              <input
-                name="birthday"
-                type="date"
-                required
-                className="w-full px-5 py-4 bg-zinc-950 border border-white/5 text-white rounded-2xl focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all text-sm font-medium"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Password</label>
-              <input
-                name="password"
-                type="password"
-                required
-                minLength={8}
-                className="w-full px-5 py-4 bg-zinc-950 border border-white/5 text-white rounded-2xl focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all text-sm font-medium"
-                placeholder="Min. 8 characters"
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Username</label>
+            <input
+              name="username"
+              type="text"
+              required
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              placeholder="johndoe"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+            <input
+              name="email"
+              type="email"
+              required
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              placeholder="you@example.com"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+            <input
+              name="password"
+              type="password"
+              required
+              minLength={8}
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              placeholder="Min. 8 characters"
+            />
           </div>
 
           {error && (
-            <div className="text-red-400 text-[9px] text-center font-bold uppercase tracking-widest bg-red-400/5 py-3 px-4 rounded-xl border border-red-400/20 animate-in shake italic">
+            <div className="p-3 bg-red-50 rounded-xl border border-red-100 text-red-600 text-sm font-medium text-center">
               {error}
             </div>
           )}
@@ -119,20 +81,17 @@ function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-5 bg-blue-600 text-white text-[11px] font-black rounded-2xl hover:bg-blue-500 transition-all shadow-xl shadow-blue-600/20 uppercase tracking-[0.2em] italic disabled:opacity-50 active:scale-95 flex items-center justify-center space-x-3"
+            className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-600/20 disabled:opacity-50"
           >
-            {loading ? <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div> : <span>Execute Registration</span>}
+            {loading ? "Creating account..." : "Register"}
           </button>
         </form>
-        
-        <div className="text-center mt-10">
-            <div className="h-px bg-white/5 w-full mb-8"></div>
-            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
-                Authenticated Identity?{' '}
-                <Link to="/login" className="text-blue-500 hover:text-blue-400 transition-colors italic ml-1">
-                    Establish Connection
-                </Link>
-            </p>
+
+        <div className="mt-8 pt-6 border-t border-slate-100 text-center text-sm text-slate-500">
+          Already have an account?{" "}
+          <Link to="/login" className="text-blue-600 font-bold hover:underline">
+            Log In
+          </Link>
         </div>
       </div>
     </div>

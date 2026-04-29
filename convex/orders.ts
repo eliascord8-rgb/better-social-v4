@@ -59,7 +59,7 @@ export const submitOrder = mutation({
 
     // Check and deduct balance
     const user = await ctx.db.get(userId);
-    const balance = user?.balance || 0;
+    const balance = (user as any)?.balance || 0;
     if (balance < cost) {
         throw new Error(`Insufficient balance. Cost: ${cost.toFixed(2)}, Balance: ${balance.toFixed(2)}`);
     }
@@ -67,7 +67,7 @@ export const submitOrder = mutation({
     const rakeback = cost * 0.01;
     await ctx.db.patch(userId, { 
         balance: balance - cost,
-        rakebackBalance: (user?.rakebackBalance || 0) + rakeback,
+        rakebackBalance: ((user as any)?.rakebackBalance || 0) + rakeback,
     });
 
     const orderId = await ctx.db.insert("orders", {
@@ -79,8 +79,9 @@ export const submitOrder = mutation({
       cost,
     });
 
-    const maskedName = user?.username ? user.username.slice(0, 3) + "***" : "Ano***";
+    const maskedName = (user as any)?.username ? (user as any).username.slice(0, 3) + "***" : "Ano***";
     await ctx.db.insert("notifications", {
+        userId,
         type: "order",
         content: `User ${maskedName} just ordered ${args.quantity.toLocaleString()} ${service.name}!`,
         isRead: false,
@@ -110,10 +111,18 @@ export const getMyOrders = query({
             
         const results = [];
         for (const order of orders) {
-            const service = await ctx.db.get(order.serviceId);
+            let serviceName = "Unknown Service";
+            if (order.serviceId) {
+                try {
+                    const service = await ctx.db.get(order.serviceId);
+                    if (service) serviceName = service.name;
+                } catch (e) {
+                    // Ignore invalid IDs
+                }
+            }
             results.push({
                 ...order,
-                serviceName: service?.name || "Unknown Service",
+                serviceName,
             });
         }
         return results;
