@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
 import { useAuthActions } from "@convex-dev/auth/react";
-import { useState, FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { useConvex } from "convex/react";
 import { api } from '../../convex/_generated/api';
 

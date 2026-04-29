@@ -7,7 +7,6 @@ export default defineSchema({
   users: defineTable({
     ...authTables.users.validator.fields,
     username: v.optional(v.string()),
-    birthday: v.optional(v.string()),
     balance: v.optional(v.number()),
     level: v.optional(v.number()),
     exp: v.optional(v.number()),

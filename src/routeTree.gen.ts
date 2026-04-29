@@ -16,6 +16,7 @@ import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
 import { Route as LayoutTicketsRouteImport } from './routes/_layout/tickets'
 import { Route as LayoutOrdersRouteImport } from './routes/_layout/orders'
 import { Route as LayoutNewOrderRouteImport } from './routes/_layout/new-order'
+import { Route as LayoutDashboard_oldRouteImport } from './routes/_layout/dashboard_old'
 import { Route as LayoutDashboardRouteImport } from './routes/_layout/dashboard'
 
 const RegisterRoute = RegisterRouteImport.update({
@@ -52,6 +53,11 @@ const LayoutNewOrderRoute = LayoutNewOrderRouteImport.update({
   path: '/new-order',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutDashboard_oldRoute = LayoutDashboard_oldRouteImport.update({
+  id: '/dashboard_old',
+  path: '/dashboard_old',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutDashboardRoute = LayoutDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -63,6 +69,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/dashboard': typeof LayoutDashboardRoute
+  '/dashboard_old': typeof LayoutDashboard_oldRoute
   '/new-order': typeof LayoutNewOrderRoute
   '/orders': typeof LayoutOrdersRoute
   '/tickets': typeof LayoutTicketsRoute
@@ -71,6 +78,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/dashboard': typeof LayoutDashboardRoute
+  '/dashboard_old': typeof LayoutDashboard_oldRoute
   '/new-order': typeof LayoutNewOrderRoute
   '/orders': typeof LayoutOrdersRoute
   '/tickets': typeof LayoutTicketsRoute
@@ -82,6 +90,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/_layout/dashboard': typeof LayoutDashboardRoute
+  '/_layout/dashboard_old': typeof LayoutDashboard_oldRoute
   '/_layout/new-order': typeof LayoutNewOrderRoute
   '/_layout/orders': typeof LayoutOrdersRoute
   '/_layout/tickets': typeof LayoutTicketsRoute
@@ -94,6 +103,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/dashboard'
+    | '/dashboard_old'
     | '/new-order'
     | '/orders'
     | '/tickets'
@@ -102,6 +112,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/dashboard'
+    | '/dashboard_old'
     | '/new-order'
     | '/orders'
     | '/tickets'
@@ -112,6 +123,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/_layout/dashboard'
+    | '/_layout/dashboard_old'
     | '/_layout/new-order'
     | '/_layout/orders'
     | '/_layout/tickets'
@@ -175,6 +187,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutNewOrderRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/dashboard_old': {
+      id: '/_layout/dashboard_old'
+      path: '/dashboard_old'
+      fullPath: '/dashboard_old'
+      preLoaderRoute: typeof LayoutDashboard_oldRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/dashboard': {
       id: '/_layout/dashboard'
       path: '/dashboard'
@@ -187,6 +206,7 @@ declare module '@tanstack/react-router' {
 
 interface LayoutRouteChildren {
   LayoutDashboardRoute: typeof LayoutDashboardRoute
+  LayoutDashboard_oldRoute: typeof LayoutDashboard_oldRoute
   LayoutNewOrderRoute: typeof LayoutNewOrderRoute
   LayoutOrdersRoute: typeof LayoutOrdersRoute
   LayoutTicketsRoute: typeof LayoutTicketsRoute
@@ -195,6 +215,7 @@ interface LayoutRouteChildren {
 
 const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutDashboardRoute: LayoutDashboardRoute,
+  LayoutDashboard_oldRoute: LayoutDashboard_oldRoute,
   LayoutNewOrderRoute: LayoutNewOrderRoute,
   LayoutOrdersRoute: LayoutOrdersRoute,
   LayoutTicketsRoute: LayoutTicketsRoute,

@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
 import { useAuthActions } from "@convex-dev/auth/react";
-import { useState, FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 
 export const Route = createFileRoute('/register')({
   component: RegisterPage,
