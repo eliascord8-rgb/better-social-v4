@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useQuery } from 'convex/react'
-import { api } from '../convex/_generated/api'
+import { api } from '../../convex/_generated/api'
 import { useEffect } from 'react'
 
 export const Route = createFileRoute('/')({

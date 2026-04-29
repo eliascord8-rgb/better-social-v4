@@ -12,12 +12,16 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LayoutRouteImport } from './routes/_layout'
-import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as LayoutTicketsRouteImport } from './routes/_layout/tickets'
+import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
 import { Route as LayoutOrdersRouteImport } from './routes/_layout/orders'
 import { Route as LayoutNewOrderRouteImport } from './routes/_layout/new-order'
-import { Route as LayoutDashboard_oldRouteImport } from './routes/_layout/dashboard_old'
+import { Route as LayoutKycRouteImport } from './routes/_layout/kyc'
+import { Route as LayoutIrcRouteImport } from './routes/_layout/irc'
 import { Route as LayoutDashboardRouteImport } from './routes/_layout/dashboard'
+import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
+import { Route as LayoutAddFundsRouteImport } from './routes/_layout/add-funds'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -33,14 +37,19 @@ const LayoutRoute = LayoutRouteImport.update({
   id: '/_layout',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LayoutIndexRoute = LayoutIndexRouteImport.update({
+const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => LayoutRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
 const LayoutTicketsRoute = LayoutTicketsRouteImport.update({
   id: '/tickets',
   path: '/tickets',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutSettingsRoute = LayoutSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutOrdersRoute = LayoutOrdersRouteImport.update({
@@ -53,9 +62,14 @@ const LayoutNewOrderRoute = LayoutNewOrderRouteImport.update({
   path: '/new-order',
   getParentRoute: () => LayoutRoute,
 } as any)
-const LayoutDashboard_oldRoute = LayoutDashboard_oldRouteImport.update({
-  id: '/dashboard_old',
-  path: '/dashboard_old',
+const LayoutKycRoute = LayoutKycRouteImport.update({
+  id: '/kyc',
+  path: '/kyc',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutIrcRoute = LayoutIrcRouteImport.update({
+  id: '/irc',
+  path: '/irc',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutDashboardRoute = LayoutDashboardRouteImport.update({
@@ -63,38 +77,60 @@ const LayoutDashboardRoute = LayoutDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutAdminRoute = LayoutAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutAddFundsRoute = LayoutAddFundsRouteImport.update({
+  id: '/add-funds',
+  path: '/add-funds',
+  getParentRoute: () => LayoutRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof LayoutIndexRoute
+  '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/add-funds': typeof LayoutAddFundsRoute
+  '/admin': typeof LayoutAdminRoute
   '/dashboard': typeof LayoutDashboardRoute
-  '/dashboard_old': typeof LayoutDashboard_oldRoute
+  '/irc': typeof LayoutIrcRoute
+  '/kyc': typeof LayoutKycRoute
   '/new-order': typeof LayoutNewOrderRoute
   '/orders': typeof LayoutOrdersRoute
+  '/settings': typeof LayoutSettingsRoute
   '/tickets': typeof LayoutTicketsRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/add-funds': typeof LayoutAddFundsRoute
+  '/admin': typeof LayoutAdminRoute
   '/dashboard': typeof LayoutDashboardRoute
-  '/dashboard_old': typeof LayoutDashboard_oldRoute
+  '/irc': typeof LayoutIrcRoute
+  '/kyc': typeof LayoutKycRoute
   '/new-order': typeof LayoutNewOrderRoute
   '/orders': typeof LayoutOrdersRoute
+  '/settings': typeof LayoutSettingsRoute
   '/tickets': typeof LayoutTicketsRoute
-  '/': typeof LayoutIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/_layout': typeof LayoutRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/_layout/add-funds': typeof LayoutAddFundsRoute
+  '/_layout/admin': typeof LayoutAdminRoute
   '/_layout/dashboard': typeof LayoutDashboardRoute
-  '/_layout/dashboard_old': typeof LayoutDashboard_oldRoute
+  '/_layout/irc': typeof LayoutIrcRoute
+  '/_layout/kyc': typeof LayoutKycRoute
   '/_layout/new-order': typeof LayoutNewOrderRoute
   '/_layout/orders': typeof LayoutOrdersRoute
+  '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/tickets': typeof LayoutTicketsRoute
-  '/_layout/': typeof LayoutIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -102,35 +138,48 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/register'
+    | '/add-funds'
+    | '/admin'
     | '/dashboard'
-    | '/dashboard_old'
+    | '/irc'
+    | '/kyc'
     | '/new-order'
     | '/orders'
+    | '/settings'
     | '/tickets'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/login'
     | '/register'
+    | '/add-funds'
+    | '/admin'
     | '/dashboard'
-    | '/dashboard_old'
+    | '/irc'
+    | '/kyc'
     | '/new-order'
     | '/orders'
+    | '/settings'
     | '/tickets'
-    | '/'
   id:
     | '__root__'
+    | '/'
     | '/_layout'
     | '/login'
     | '/register'
+    | '/_layout/add-funds'
+    | '/_layout/admin'
     | '/_layout/dashboard'
-    | '/_layout/dashboard_old'
+    | '/_layout/irc'
+    | '/_layout/kyc'
     | '/_layout/new-order'
     | '/_layout/orders'
+    | '/_layout/settings'
     | '/_layout/tickets'
-    | '/_layout/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   LayoutRoute: typeof LayoutRouteWithChildren
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
@@ -159,18 +208,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_layout/': {
-      id: '/_layout/'
+    '/': {
+      id: '/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof LayoutIndexRouteImport
-      parentRoute: typeof LayoutRoute
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_layout/tickets': {
       id: '/_layout/tickets'
       path: '/tickets'
       fullPath: '/tickets'
       preLoaderRoute: typeof LayoutTicketsRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/settings': {
+      id: '/_layout/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof LayoutSettingsRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/orders': {
@@ -187,11 +243,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutNewOrderRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_layout/dashboard_old': {
-      id: '/_layout/dashboard_old'
-      path: '/dashboard_old'
-      fullPath: '/dashboard_old'
-      preLoaderRoute: typeof LayoutDashboard_oldRouteImport
+    '/_layout/kyc': {
+      id: '/_layout/kyc'
+      path: '/kyc'
+      fullPath: '/kyc'
+      preLoaderRoute: typeof LayoutKycRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/irc': {
+      id: '/_layout/irc'
+      path: '/irc'
+      fullPath: '/irc'
+      preLoaderRoute: typeof LayoutIrcRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/dashboard': {
@@ -201,31 +264,52 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutDashboardRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/admin': {
+      id: '/_layout/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof LayoutAdminRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/add-funds': {
+      id: '/_layout/add-funds'
+      path: '/add-funds'
+      fullPath: '/add-funds'
+      preLoaderRoute: typeof LayoutAddFundsRouteImport
+      parentRoute: typeof LayoutRoute
+    }
   }
 }
 
 interface LayoutRouteChildren {
+  LayoutAddFundsRoute: typeof LayoutAddFundsRoute
+  LayoutAdminRoute: typeof LayoutAdminRoute
   LayoutDashboardRoute: typeof LayoutDashboardRoute
-  LayoutDashboard_oldRoute: typeof LayoutDashboard_oldRoute
+  LayoutIrcRoute: typeof LayoutIrcRoute
+  LayoutKycRoute: typeof LayoutKycRoute
   LayoutNewOrderRoute: typeof LayoutNewOrderRoute
   LayoutOrdersRoute: typeof LayoutOrdersRoute
+  LayoutSettingsRoute: typeof LayoutSettingsRoute
   LayoutTicketsRoute: typeof LayoutTicketsRoute
-  LayoutIndexRoute: typeof LayoutIndexRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
+  LayoutAddFundsRoute: LayoutAddFundsRoute,
+  LayoutAdminRoute: LayoutAdminRoute,
   LayoutDashboardRoute: LayoutDashboardRoute,
-  LayoutDashboard_oldRoute: LayoutDashboard_oldRoute,
+  LayoutIrcRoute: LayoutIrcRoute,
+  LayoutKycRoute: LayoutKycRoute,
   LayoutNewOrderRoute: LayoutNewOrderRoute,
   LayoutOrdersRoute: LayoutOrdersRoute,
+  LayoutSettingsRoute: LayoutSettingsRoute,
   LayoutTicketsRoute: LayoutTicketsRoute,
-  LayoutIndexRoute: LayoutIndexRoute,
 }
 
 const LayoutRouteWithChildren =
   LayoutRoute._addFileChildren(LayoutRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   LayoutRoute: LayoutRouteWithChildren,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
