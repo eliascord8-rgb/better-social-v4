@@ -117,7 +117,7 @@ function CommunityChat({
     const [input, setInput] = useState("");
     const scrollRef = useRef<HTMLDivElement>(null);
 
-    const isMuted = user?.muteUntil && user.muteUntil > Date.now();
+    const isMuted = !!(user?.muteUntil && user.muteUntil > Date.now());
 
     useEffect(() => {
         if (scrollRef.current) {
@@ -332,6 +332,12 @@ function DashboardLayout() {
   const [chatTab, setChatTab] = useState<"global" | "private">("global");
   const [chatPrivateUser, setChatPrivateUser] = useState<Id<"users"> | null>(null);
 
+  const handleUserClick = (targetId: Id<"users">) => {
+    setChatTab("private");
+    setChatPrivateUser(targetId);
+    setChatOpen(true);
+  };
+
   if (user === null) return null;
 
   return (
@@ -444,7 +450,7 @@ function DashboardLayout() {
                             <div className="p-8 text-center text-[10px] text-zinc-600 font-bold uppercase tracking-widest italic">Clear Channel.</div>
                         ) : (
                             notifications.map((n: any) => (
-                                <div key={n._id} className="p-4 border-b border-white/5 hover:bg-white/[0.02] transition-colors cursor-pointer group" onClick={() => n.metadata?.fromId && setSelectedUserId(n.metadata.fromId)}>
+                                <div key={n._id} className="p-4 border-b border-white/5 hover:bg-white/[0.02] transition-colors cursor-pointer group" onClick={() => n.metadata?.fromId && handleUserClick(n.metadata.fromId)}>
                                     <div className="flex items-center space-x-2 mb-1">
                                         <div className={`w-1.5 h-1.5 rounded-full ${n.isRead ? 'bg-zinc-700' : 'bg-blue-500'}`}></div>
                                         <span className="text-[7px] font-bold text-zinc-500 uppercase">{n.type}</span>
@@ -494,7 +500,7 @@ function DashboardLayout() {
       `}>
           <CommunityChat
             mobileClose={() => setChatOpen(false)}
-            onUserClick={(id) => setSelectedUserId(id)}
+            onUserClick={(id) => handleUserClick(id)}
             externalTab={chatTab}
             onTabChange={setChatTab}
             externalPrivateUser={chatPrivateUser}
