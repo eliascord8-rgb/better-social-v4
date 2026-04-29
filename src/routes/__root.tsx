@@ -3,17 +3,17 @@ import {
   createRootRouteWithContext,
 } from '@tanstack/react-router'
 import type { QueryClient } from '@tanstack/react-query'
+import * as React from 'react'
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
 }>()({
-  notFoundComponent: () => <div>Page not found</div>,
   component: RootComponent,
 })
 
 function RootComponent() {
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
+    <div className="min-h-screen bg-slate-950 font-sans text-slate-100">
       <Outlet />
     </div>
   )
