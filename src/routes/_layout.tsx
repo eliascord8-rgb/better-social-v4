@@ -27,6 +27,8 @@ function GlobalLayout() {
             <nav className="flex-1 p-4 space-y-2">
               <SidebarLink to="/dashboard" label="Dashboard" icon="📊" />
               <SidebarLink to="/new-order" label="New Order" icon="🛒" />
+              <SidebarLink to="/orders" label="Order Log" icon="📋" />
+              <SidebarLink to="/tickets" label="Support Core" icon="🎧" />
             </nav>
 
             <div className="p-4 border-t border-slate-100 space-y-4">
@@ -67,7 +69,15 @@ function GlobalLayout() {
       </Authenticated>
 
       <Unauthenticated>
-         <Outlet />
+         <div className="min-h-screen flex items-center justify-center bg-slate-950">
+            <div className="text-center space-y-4">
+                <h1 className="text-2xl font-bold text-white">Access Restricted</h1>
+                <p className="text-slate-400">Please authorize your node to proceed.</p>
+                <Link to="/login" className="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg font-bold">
+                    Login
+                </Link>
+            </div>
+         </div>
       </Unauthenticated>
     </main>
   )

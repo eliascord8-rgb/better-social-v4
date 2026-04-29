@@ -59,6 +59,7 @@ export const processExternalOrder = internalAction({
 
 export const getOrderForProcessing = internalQuery({
   args: { orderId: v.id("orders") },
+  returns: v.any(),
   handler: async (ctx, args) => {
     const order = await ctx.db.get(args.orderId);
     if (!order) return null;

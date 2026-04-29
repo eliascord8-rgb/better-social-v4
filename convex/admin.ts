@@ -40,32 +40,24 @@ export const setMaintenanceMode = mutation({
 
 export const getSettings = query({
   args: {},
-  returns: v.union(v.null(), v.object({ 
-    _id: v.id("apiSettings"),
-    _creationTime: v.number(),
-    apiUrl: v.string(), 
-    apiKey: v.string() 
-  })),
+  returns: v.any(),
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) return null;
     const user = await ctx.db.get(userId);
     if (!user?.isAdmin) return null;
 
-    return await ctx.db.query("apiSettings").first();
+    const settings = await ctx.db.query("apiSettings").first();
+    return settings || null;
   },
 });
 
 export const getSettingsInternal = internalQuery({
   args: {},
-  returns: v.union(v.null(), v.object({ 
-    _id: v.id("apiSettings"),
-    _creationTime: v.number(),
-    apiUrl: v.string(), 
-    apiKey: v.string() 
-  })),
+  returns: v.any(),
   handler: async (ctx) => {
-    return await ctx.db.query("apiSettings").first();
+    const settings = await ctx.db.query("apiSettings").first();
+    return settings || null;
   },
 });
 

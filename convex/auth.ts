@@ -5,7 +5,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [
     Password({
         profile(params) {
-            console.log("Password profile params:", params);
+            console.log("Password profile params:", JSON.stringify(params));
             // The most resilient identifier extraction possible
             const emailValue = params.email || params.identifier || params.emailAddress || "";
             const email = (typeof emailValue === "string" ? emailValue : "").toLowerCase().trim();
@@ -25,14 +25,9 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
                 isKycVerified: false,
                 rakebackBalance: 0,
                 lastRakebackTime: Date.now(),
+                email,
             };
-            if (params.birthday) {
-                profile.birthday = params.birthday;
-            }
-            if (email) {
-                profile.email = email;
-            }
-            console.log("Creating profile:", profile);
+            console.log("Constructed profile for DB insertion:", JSON.stringify(profile));
             return profile;
         },
     }),

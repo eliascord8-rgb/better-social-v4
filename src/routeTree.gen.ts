@@ -13,6 +13,8 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
+import { Route as LayoutTicketsRouteImport } from './routes/_layout/tickets'
+import { Route as LayoutOrdersRouteImport } from './routes/_layout/orders'
 import { Route as LayoutNewOrderRouteImport } from './routes/_layout/new-order'
 import { Route as LayoutDashboardRouteImport } from './routes/_layout/dashboard'
 
@@ -35,6 +37,16 @@ const LayoutIndexRoute = LayoutIndexRouteImport.update({
   path: '/',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutTicketsRoute = LayoutTicketsRouteImport.update({
+  id: '/tickets',
+  path: '/tickets',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutOrdersRoute = LayoutOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutNewOrderRoute = LayoutNewOrderRouteImport.update({
   id: '/new-order',
   path: '/new-order',
@@ -52,12 +64,16 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/dashboard': typeof LayoutDashboardRoute
   '/new-order': typeof LayoutNewOrderRoute
+  '/orders': typeof LayoutOrdersRoute
+  '/tickets': typeof LayoutTicketsRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/dashboard': typeof LayoutDashboardRoute
   '/new-order': typeof LayoutNewOrderRoute
+  '/orders': typeof LayoutOrdersRoute
+  '/tickets': typeof LayoutTicketsRoute
   '/': typeof LayoutIndexRoute
 }
 export interface FileRoutesById {
@@ -67,13 +83,29 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/_layout/dashboard': typeof LayoutDashboardRoute
   '/_layout/new-order': typeof LayoutNewOrderRoute
+  '/_layout/orders': typeof LayoutOrdersRoute
+  '/_layout/tickets': typeof LayoutTicketsRoute
   '/_layout/': typeof LayoutIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/register' | '/dashboard' | '/new-order'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/dashboard'
+    | '/new-order'
+    | '/orders'
+    | '/tickets'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/register' | '/dashboard' | '/new-order' | '/'
+  to:
+    | '/login'
+    | '/register'
+    | '/dashboard'
+    | '/new-order'
+    | '/orders'
+    | '/tickets'
+    | '/'
   id:
     | '__root__'
     | '/_layout'
@@ -81,6 +113,8 @@ export interface FileRouteTypes {
     | '/register'
     | '/_layout/dashboard'
     | '/_layout/new-order'
+    | '/_layout/orders'
+    | '/_layout/tickets'
     | '/_layout/'
   fileRoutesById: FileRoutesById
 }
@@ -120,6 +154,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/tickets': {
+      id: '/_layout/tickets'
+      path: '/tickets'
+      fullPath: '/tickets'
+      preLoaderRoute: typeof LayoutTicketsRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/orders': {
+      id: '/_layout/orders'
+      path: '/orders'
+      fullPath: '/orders'
+      preLoaderRoute: typeof LayoutOrdersRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/new-order': {
       id: '/_layout/new-order'
       path: '/new-order'
@@ -140,12 +188,16 @@ declare module '@tanstack/react-router' {
 interface LayoutRouteChildren {
   LayoutDashboardRoute: typeof LayoutDashboardRoute
   LayoutNewOrderRoute: typeof LayoutNewOrderRoute
+  LayoutOrdersRoute: typeof LayoutOrdersRoute
+  LayoutTicketsRoute: typeof LayoutTicketsRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutDashboardRoute: LayoutDashboardRoute,
   LayoutNewOrderRoute: LayoutNewOrderRoute,
+  LayoutOrdersRoute: LayoutOrdersRoute,
+  LayoutTicketsRoute: LayoutTicketsRoute,
   LayoutIndexRoute: LayoutIndexRoute,
 }
 

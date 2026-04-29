@@ -113,12 +113,8 @@ export const getMyOrders = query({
         for (const order of orders) {
             let serviceName = "Unknown Service";
             if (order.serviceId) {
-                try {
-                    const service = await ctx.db.get(order.serviceId);
-                    if (service) serviceName = service.name;
-                } catch (e) {
-                    // Ignore invalid IDs
-                }
+                const service = await ctx.db.get(order.serviceId);
+                if (service) serviceName = (service as any).name;
             }
             results.push({
                 ...order,

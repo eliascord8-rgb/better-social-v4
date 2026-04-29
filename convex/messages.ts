@@ -31,19 +31,7 @@ export const sendMessage = mutation({
 
 export const getConversations = query({
   args: {},
-  returns: v.array(v.object({
-    otherUser: v.object({
-      _id: v.id("users"),
-      username: v.optional(v.string()),
-      image: v.optional(v.string()),
-    }),
-    lastMessage: v.object({
-        message: v.optional(v.string()),
-        audioUrl: v.optional(v.string()),
-        _creationTime: v.number(),
-    }),
-    unreadCount: v.number(),
-  })),
+  returns: v.array(v.any()),
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) return [];
@@ -85,15 +73,7 @@ export const getConversations = query({
 
 export const getMessages = query({
   args: { otherUserId: v.id("users") },
-  returns: v.array(v.object({
-    _id: v.id("directMessages"),
-    _creationTime: v.number(),
-    senderId: v.id("users"),
-    receiverId: v.id("users"),
-    message: v.optional(v.string()),
-    audioUrl: v.optional(v.string()),
-    isRead: v.boolean(),
-  })),
+  returns: v.array(v.any()),
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) return [];
@@ -122,11 +102,12 @@ export const markRead = mutation({
         const unread = await ctx.db
             .query("directMessages")
             .withIndex("conversation", q => q.eq("senderId", args.otherUserId).eq("receiverId", userId))
-            .filter(q => q.eq(q.field("isRead"), false))
             .collect();
 
         for (const msg of unread) {
-            await ctx.db.patch(msg._id, { isRead: true });
+            if (!msg.isRead) {
+                await ctx.db.patch(msg._id, { isRead: true });
+            }
         }
         return null;
     }
